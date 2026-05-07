@@ -24,10 +24,15 @@ export type {
   FlashToastType,
 } from '@tanstack/start-toast-core'
 
-/** Per-app config for the flash cookie. Apply once at boot via `setFlashCookieOptions`. */
+/** Per-app config for the flash cookie. Override defaults via `setFlashCookieOptions`. */
 export interface FlashCookieOptions {
-  /** Secret used to seal/unseal the cookie. Must be ≥32 characters. */
-  secret?: string
+  /**
+   * Secret used to seal/unseal the cookie. Must be ≥32 characters.
+   * If omitted, the lib reads `process.env.START_TOAST_SECRET` on first
+   * use. Pass a function for runtime-resolved secrets (Vault, AWS Secrets
+   * Manager, etc.).
+   */
+  secret?: string | (() => string | undefined)
   /** Cookie name. Defaults to `__start_toast`. */
   name?: string
   /** Max-Age in seconds. Defaults to `60`. */
@@ -42,10 +47,21 @@ export interface FlashCookieOptions {
   httpOnly?: boolean
 }
 
+const ENV_VAR = 'START_TOAST_SECRET'
 const PLACEHOLDER_SECRET = 'CHANGE-ME-set-via-setFlashCookieOptions-please-do!!'
 
-const config: Required<FlashCookieOptions> = {
-  secret: PLACEHOLDER_SECRET,
+interface InternalConfig {
+  secret: string | (() => string | undefined) | undefined
+  name: string
+  maxAge: number
+  path: string
+  sameSite: 'lax' | 'strict' | 'none'
+  secure: boolean
+  httpOnly: boolean
+}
+
+const config: InternalConfig = {
+  secret: undefined, // resolved lazily — see resolveSecret()
   name: '__start_toast',
   maxAge: 60,
   path: '/',
@@ -55,36 +71,50 @@ const config: Required<FlashCookieOptions> = {
 }
 
 /**
- * Configure the flash cookie. Call once at server boot — every subsequent
- * helper picks up the new config. Throws on first staging call if `secret`
- * is still the placeholder default.
+ * Configure the flash cookie. The lib works without calling this — set
+ * `START_TOAST_SECRET` in your server environment and you're done. Reach
+ * for this when you need a custom cookie name, runtime-resolved secrets,
+ * or different defaults.
  *
  * Safe to call from a module bundled in both client and server contexts:
- * `undefined` values are skipped, so a client-side
- * `setFlashCookieOptions({ secret: process.env.SESSION_SECRET })` (where
- * the env var is `undefined`) won't clobber the server-set secret.
+ * `undefined` values are skipped, so a client-side call where an env var
+ * resolves to `undefined` won't clobber the server-set value.
  *
  * @example
  * ```ts
- * setFlashCookieOptions({ secret: process.env.SESSION_SECRET })
+ * setFlashCookieOptions({ name: 'my-flash', maxAge: 30 })
+ * setFlashCookieOptions({ secret: () => vault.read('flash-secret') })
  * ```
  */
 export function setFlashCookieOptions(opts: FlashCookieOptions): void {
-  for (const [key, value] of Object.entries(opts)) {
-    if (value !== undefined) {
-      ;(config as Record<string, unknown>)[key] = value
-    }
-  }
+  if (opts.secret !== undefined) config.secret = opts.secret
+  if (opts.name !== undefined) config.name = opts.name
+  if (opts.maxAge !== undefined) config.maxAge = opts.maxAge
+  if (opts.path !== undefined) config.path = opts.path
+  if (opts.sameSite !== undefined) config.sameSite = opts.sameSite
+  if (opts.secure !== undefined) config.secure = opts.secure
+  if (opts.httpOnly !== undefined) config.httpOnly = opts.httpOnly
 }
 
-function ensureSecret(): string {
-  if (config.secret === PLACEHOLDER_SECRET) {
+function resolveSecret(): string {
+  // Precedence: explicit setFlashCookieOptions({ secret }) > env var > throw.
+  const fromConfig =
+    typeof config.secret === 'function' ? config.secret() : config.secret
+  const resolved = fromConfig ?? process.env[ENV_VAR]
+
+  if (!resolved || resolved === PLACEHOLDER_SECRET) {
     throw new Error(
-      '[@tanstack/react-start-toast] Refusing to seal a flash toast with the placeholder secret. ' +
-        'Call setFlashCookieOptions({ secret: process.env.SESSION_SECRET }) at server boot.',
+      `[@tanstack/react-start-toast] No flash-cookie secret resolved. ` +
+        `Set ${ENV_VAR} in your server environment, or call ` +
+        `setFlashCookieOptions({ secret }) before any flash-toast call.`,
     )
   }
-  return config.secret
+  if (resolved.length < 32) {
+    throw new Error(
+      `[@tanstack/react-start-toast] Flash-cookie secret must be at least 32 characters.`,
+    )
+  }
+  return resolved
 }
 
 function cookieAttrs(maxAge: number): {
@@ -112,7 +142,7 @@ export async function setFlashToast(
   input: FlashToastInput,
   defaultType: FlashToastType = 'info',
 ): Promise<void> {
-  const password = ensureSecret()
+  const password = resolveSecret()
   const normalized = normalizeFlashInput(input, defaultType)
   const toast: FlashToast = { ...normalized, _id: makeFlashToastId() }
   const sealed = await sealToast(toast, password)
@@ -127,7 +157,7 @@ export async function setFlashToast(
 export async function consumeFlashToast(): Promise<FlashToast | null> {
   const sealed = tssGetCookie(config.name)
   if (!sealed) return null
-  const password = ensureSecret()
+  const password = resolveSecret()
   const toast = await unsealToast(sealed, password)
   tssSetCookie(config.name, '', cookieAttrs(0))
   return toast

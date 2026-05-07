@@ -7,13 +7,8 @@ import {
 import {
   FlashToastEffect,
   consumeFlashToastFn,
-  setFlashCookieOptions,
 } from '@tanstack/react-start-toast'
 import type { ReactNode } from 'react'
-
-setFlashCookieOptions({
-  secret: process.env.SESSION_SECRET ?? 'example-secret-32-chars-or-more-please-thanks!!',
-})
 
 export const Route = createRootRoute({
   head: () => ({
