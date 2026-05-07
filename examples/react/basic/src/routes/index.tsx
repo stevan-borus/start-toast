@@ -1,65 +1,84 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import {
-  redirectWithError,
-  redirectWithInfo,
-  redirectWithSuccess,
-  redirectWithToast,
-  redirectWithWarning,
-} from '@tanstack/react-start-toast'
-
-const triggerSuccessFn = createServerFn({ method: 'POST' }).handler(
-  async () => redirectWithSuccess('/redirected', 'Saved your preferences'),
-)
-const triggerErrorFn = createServerFn({ method: 'POST' }).handler(
-  async () => redirectWithError('/redirected', 'Something went wrong'),
-)
-const triggerInfoFn = createServerFn({ method: 'POST' }).handler(
-  async () => redirectWithInfo('/redirected', 'FYI: maintenance window 9pm'),
-)
-const triggerWarningFn = createServerFn({ method: 'POST' }).handler(
-  async () => redirectWithWarning('/redirected', 'Heads up — unsaved changes'),
-)
-const triggerGenericFn = createServerFn({ method: 'POST' }).handler(
-  async () =>
-    redirectWithToast('/redirected', {
-      message: 'Generic toast',
-      description: 'Defaults to type=info',
-      duration: 4000,
-    }),
-)
 
 export const Route = createFileRoute('/')({
   component: IndexComponent,
 })
+
+const REDIRECT_OPTIONS = [
+  { value: 'redirect-success', label: 'redirectWithSuccess' },
+  { value: 'redirect-error', label: 'redirectWithError' },
+  { value: 'redirect-info', label: 'redirectWithInfo' },
+  { value: 'redirect-warning', label: 'redirectWithWarning' },
+  { value: 'redirect-generic', label: 'redirectWithToast (object input)' },
+] as const
+
+const REPLACE_OPTIONS = [
+  { value: 'replace-success', label: 'replaceWithSuccess' },
+  { value: 'replace-error', label: 'replaceWithError' },
+  { value: 'replace-info', label: 'replaceWithInfo' },
+  { value: 'replace-warning', label: 'replaceWithWarning' },
+  { value: 'replace-generic', label: 'replaceWithToast (object input)' },
+] as const
 
 function IndexComponent() {
   return (
     <main>
       <h1>react-start-toast example</h1>
       <p>
-        Each button triggers a server fn that calls one of the
-        <code> redirectWith* </code> helpers, then this page is replaced by
-        <code> /redirected </code>, where the toast fires once via
-        <code> FlashToastEffect </code>.
+        The form below submits to <code>/trigger?type=…</code>. That route's
+        loader calls one of the <code>redirectWith*</code> or{' '}
+        <code>replaceWith*</code> helpers, which throws a TSS redirect to{' '}
+        <code>/redirected</code> with the flash cookie staged on the
+        response. The next request — the redirect target — replays the
+        cookie, the root loader unseals it via{' '}
+        <code>consumeFlashToastFn</code>, and{' '}
+        <code>FlashToastEffect</code> fires the toast once.
       </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 320 }}>
-        <button data-testid="btn-success" onClick={() => triggerSuccessFn()}>
-          redirectWithSuccess
+      <p style={{ fontSize: '0.875rem', color: '#666' }}>
+        This is the canonical flash-toast shape: a form submission (or any
+        full-page navigation — OAuth callback, sign-out, email
+        verification link) hits a server-side handler that stages the
+        cookie before redirecting. Pure-client navigation through a
+        redirect-throwing loader doesn't work — the destination loader
+        runs before the browser commits the cookie. If you find yourself
+        wanting a flash toast on a client-side action, fire your toast UI
+        directly in the mutation's <code>onSuccess</code> instead.
+      </p>
+      <form
+        method="GET"
+        action="/trigger"
+        style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 480 }}
+      >
+        <fieldset>
+          <legend>
+            <strong>redirectWith*</strong> — adds a history entry
+          </legend>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+            {REDIRECT_OPTIONS.map(({ value, label }) => (
+              <label key={value} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="radio" name="type" value={value} data-testid={`btn-${value}`} />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>
+            <strong>replaceWith*</strong> — replaces the current entry, back button skips it
+          </legend>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+            {REPLACE_OPTIONS.map(({ value, label }) => (
+              <label key={value} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="radio" name="type" value={value} data-testid={`btn-${value}`} />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <button type="submit" data-testid="submit-trigger" style={{ padding: '8px 16px', fontSize: 14 }}>
+          Submit
         </button>
-        <button data-testid="btn-error" onClick={() => triggerErrorFn()}>
-          redirectWithError
-        </button>
-        <button data-testid="btn-info" onClick={() => triggerInfoFn()}>
-          redirectWithInfo
-        </button>
-        <button data-testid="btn-warning" onClick={() => triggerWarningFn()}>
-          redirectWithWarning
-        </button>
-        <button data-testid="btn-generic" onClick={() => triggerGenericFn()}>
-          redirectWithToast (object input)
-        </button>
-      </div>
+      </form>
     </main>
   )
 }

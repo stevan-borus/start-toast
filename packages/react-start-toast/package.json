@@ -37,6 +37,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./server": {
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs"
+    },
     "./package.json": "./package.json"
   },
   "sideEffects": false,

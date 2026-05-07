@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import { unsealToast } from '@tanstack/start-toast-core'
 import {
   setCookieMock,
   redirectMock,
@@ -12,7 +13,7 @@ import {
   redirectWithInfo,
   redirectWithWarning,
   setFlashCookieOptions,
-} from '../src/index.js'
+} from '../src/server.js'
 
 beforeEach(() => {
   resetMocks()
@@ -46,5 +47,42 @@ describe('redirectWith* helpers', () => {
 
     expect(setCookieMock).toHaveBeenCalledTimes(1)
     expect(redirectMock).toHaveBeenCalledTimes(1)
+  })
+
+  // Without unsealing the cookie value, a refactor that collapsed every
+  // helper to `setFlashToast(input, 'info')` would leave the prefix-only
+  // assertions above green. Lock the type each variant writes.
+  it.each([
+    ['redirectWithSuccess', () => redirectWithSuccess('/x', 'm'), 'success'],
+    ['redirectWithError', () => redirectWithError('/x', 'm'), 'error'],
+    ['redirectWithInfo', () => redirectWithInfo('/x', 'm'), 'info'],
+    ['redirectWithWarning', () => redirectWithWarning('/x', 'm'), 'warning'],
+    [
+      'redirectWithToast (default info)',
+      () => redirectWithToast('/x', 'm'),
+      'info',
+    ],
+  ] as const)(
+    '%s seals the correct type into the cookie',
+    async (_name, run, expectedType) => {
+      await expect(run()).rejects.toMatchObject({ __redirect: true })
+
+      const sealed = setCookieMock.mock.calls[0]![1]
+      const unsealed = await unsealToast(sealed, TEST_PASSWORD)
+      expect(unsealed?.type).toBe(expectedType)
+    },
+  )
+
+  it('explicit type on the input object overrides the helper default', async () => {
+    // redirectWithToast defaults to 'info' but caller passed type:'error'.
+    // Mirrors the conditional-toast pattern (`setFlashToast(toast, toast.type)`)
+    // a wrapper might use when the type is data-driven.
+    await expect(
+      redirectWithToast('/x', { message: 'm', type: 'error' }),
+    ).rejects.toMatchObject({ __redirect: true })
+
+    const sealed = setCookieMock.mock.calls[0]![1]
+    const unsealed = await unsealToast(sealed, TEST_PASSWORD)
+    expect(unsealed?.type).toBe('error')
   })
 })

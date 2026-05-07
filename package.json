@@ -45,5 +45,13 @@
   "overrides": {
     "@tanstack/start-toast-core": "workspace:*",
     "@tanstack/react-start-toast": "workspace:*"
+  },
+  "pnpm": {
+    "//": "Workspace-only pins — see examples/react/basic/KNOWN_ISSUES.md. Pins coherent 1.167.x versions of TSS internals so the example app's dev server boots; latest TSS has a plugin-core/server-core version skew that breaks `pnpm dev`. Production builds and the published lib are unaffected.",
+    "overrides": {
+      "@tanstack/start-plugin-core": "1.167.34",
+      "@tanstack/start-server-core": "1.167.19",
+      "@tanstack/start-client-core": "1.167.17"
+    }
   }
 }
