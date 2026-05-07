@@ -191,6 +191,53 @@ export async function redirectWithWarning(
   throw redirect({ href, throw: true })
 }
 
+/**
+ * Stage a flash toast and replace the current history entry with `href`.
+ * Same semantics as `redirectWith*` but uses `replace: true` so the back
+ * button doesn't return to the current URL — useful after form mutations
+ * where re-submitting on back would be wrong. Mirrors `remix-toast`'s
+ * `replaceWithToast` family.
+ */
+export async function replaceWithToast(
+  href: string,
+  input: FlashToastInput,
+): Promise<never> {
+  await setFlashToast(input, 'info')
+  throw redirect({ href, throw: true, replace: true })
+}
+
+export async function replaceWithSuccess(
+  href: string,
+  input: FlashToastInput,
+): Promise<never> {
+  await setFlashToast(input, 'success')
+  throw redirect({ href, throw: true, replace: true })
+}
+
+export async function replaceWithError(
+  href: string,
+  input: FlashToastInput,
+): Promise<never> {
+  await setFlashToast(input, 'error')
+  throw redirect({ href, throw: true, replace: true })
+}
+
+export async function replaceWithInfo(
+  href: string,
+  input: FlashToastInput,
+): Promise<never> {
+  await setFlashToast(input, 'info')
+  throw redirect({ href, throw: true, replace: true })
+}
+
+export async function replaceWithWarning(
+  href: string,
+  input: FlashToastInput,
+): Promise<never> {
+  await setFlashToast(input, 'warning')
+  throw redirect({ href, throw: true, replace: true })
+}
+
 const DEDUPE_STORAGE_KEY = '@tanstack/react-start-toast:fired'
 
 interface FlashToastEffectProps {
