@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { redirect } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
 import {
   getCookie as tssGetCookie,
   setCookie as tssSetCookie,
@@ -126,6 +128,24 @@ export async function consumeFlashToast(): Promise<FlashToast | null> {
 }
 
 /**
+ * Server-fn wrapper around `consumeFlashToast`. The RPC seam route loaders
+ * use because they live in client-bundled `.tsx` files — TSS's
+ * import-protection plugin rejects direct server-only imports from those.
+ *
+ * Wire it from your `__root.tsx` loader:
+ *
+ * ```ts
+ * export const Route = createRootRoute({
+ *   loader: async () => ({ flashToast: await consumeFlashToastFn() }),
+ *   component: RootComponent,
+ * })
+ * ```
+ */
+export const consumeFlashToastFn = createServerFn({ method: 'POST' }).handler(
+  async (): Promise<FlashToast | null> => consumeFlashToast(),
+)
+
+/**
  * Stage a flash toast and throw a TanStack Router redirect to `href` in
  * one call. Returns `Promise<never>` so TS knows code after the call is
  * unreachable. Mirrors `remix-toast`'s `redirectWithToast(url, toast)`,
@@ -169,5 +189,50 @@ export async function redirectWithWarning(
 ): Promise<never> {
   await setFlashToast(input, 'warning')
   throw redirect({ href, throw: true })
+}
+
+const DEDUPE_STORAGE_KEY = '@tanstack/react-start-toast:fired'
+
+interface FlashToastEffectProps {
+  /** The toast surfaced by your root loader, or `null` when none is staged. */
+  toast: FlashToast | null
+  /**
+   * Callback that hands the toast to your toast UI. Typical bindings:
+   * `(t) => sonner[t.type](t.message, t)` for sonner; `(t) => toast(t.message)`
+   * for react-toastify; or your own component imperative API.
+   *
+   * **Source-order constraint:** if your toast UI subscribes lazily (sonner,
+   * react-toastify, etc.), render its `<Toaster>` BEFORE this component in
+   * your JSX tree. React commits sibling effects in source order, so this
+   * component's `notify(...)` would otherwise fire before any subscriber
+   * exists and the toast would be silently dropped.
+   */
+  notify: (toast: FlashToast) => void
+}
+
+/**
+ * Drop-in renderer that fires loader-surfaced flash toasts through any toast
+ * UI. Effect-only — renders nothing. Dedupes by `_id` via sessionStorage so
+ * the same toast never re-fires across re-renders, hydration, or
+ * within-TTL refreshes.
+ */
+export function FlashToastEffect({
+  toast,
+  notify,
+}: FlashToastEffectProps): null {
+  useEffect(() => {
+    if (!toast) return
+    if (typeof window === 'undefined') return
+    try {
+      const fired = window.sessionStorage.getItem(DEDUPE_STORAGE_KEY)
+      if (fired === toast._id) return
+      window.sessionStorage.setItem(DEDUPE_STORAGE_KEY, toast._id)
+    } catch {
+      // sessionStorage can throw in incognito or quota-exceeded. Better to
+      // re-fire than to drop silently.
+    }
+    notify(toast)
+  }, [toast, notify])
+  return null
 }
 

@@ -28,7 +28,9 @@ vi.mock('@tanstack/react-start/server', () => ({
 }))
 
 vi.mock('@tanstack/react-start', () => ({
-  createServerFn: () => ({}),
+  createServerFn: () => ({
+    handler: <T>(fn: () => Promise<T>) => fn,
+  }),
 }))
 
 vi.mock('@tanstack/react-router', () => ({
