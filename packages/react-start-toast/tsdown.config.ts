@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  entry: ['./src/index.ts'],
+  entry: ['./src/index.tsx'],
   format: ['esm', 'cjs'],
   unbundle: true,
   dts: true,

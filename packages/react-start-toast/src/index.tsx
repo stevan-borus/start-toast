@@ -11,6 +11,7 @@ import {
   sealToast,
   unsealToast,
 } from '@tanstack/start-toast-core'
+import type { ReactNode } from 'react'
 import type {
   FlashToast,
   FlashToastInput,
@@ -23,26 +24,21 @@ export type {
   FlashToastType,
 } from '@tanstack/start-toast-core'
 
-/**
- * Mutable per-app config for the flash cookie. Mirrors `remix-toast`'s
- * `setToastCookieOptions` shape — a single setter that applies to every
- * subsequent helper call. `secret` is required in production; the lib will
- * throw on first use if the placeholder default is still in place.
- */
+/** Per-app config for the flash cookie. Apply once at boot via `setFlashCookieOptions`. */
 export interface FlashCookieOptions {
   /** Secret used to seal/unseal the cookie. Must be ≥32 characters. */
   secret?: string
   /** Cookie name. Defaults to `__start_toast`. */
   name?: string
-  /** Max-Age in seconds. Defaults to 60. */
+  /** Max-Age in seconds. Defaults to `60`. */
   maxAge?: number
   /** Cookie path. Defaults to `/`. */
   path?: string
   /** SameSite policy. Defaults to `lax`. */
   sameSite?: 'lax' | 'strict' | 'none'
-  /** Whether to set Secure. Defaults to `process.env.NODE_ENV === 'production'`. */
+  /** Whether to set `Secure`. Defaults to `process.env.NODE_ENV === 'production'`. */
   secure?: boolean
-  /** Whether to set HttpOnly. Defaults to `true`. */
+  /** Whether to set `HttpOnly`. Defaults to `true`. */
   httpOnly?: boolean
 }
 
@@ -59,8 +55,14 @@ const config: Required<FlashCookieOptions> = {
 }
 
 /**
- * Override the flash cookie config. Call once during server boot. Mirrors
- * `remix-toast`'s `setToastCookieOptions(options)` API.
+ * Configure the flash cookie. Call once at server boot — every subsequent
+ * helper picks up the new config. Throws on first staging call if `secret`
+ * is still the placeholder default.
+ *
+ * @example
+ * ```ts
+ * setFlashCookieOptions({ secret: process.env.SESSION_SECRET })
+ * ```
  */
 export function setFlashCookieOptions(opts: FlashCookieOptions): void {
   Object.assign(config, opts)
@@ -94,9 +96,8 @@ function cookieAttrs(maxAge: number): {
 
 /**
  * Stage a toast on the response cookie. Call from a server-side context
- * (loader, server fn, route `beforeLoad`) immediately before
- * `throw redirect()`. Multiple calls in the same response: last write
- * wins (matches `remix-toast`'s semantics).
+ * (loader, server fn, `beforeLoad`) immediately before `throw redirect()`.
+ * Multiple calls in the same response: last write wins.
  */
 export async function setFlashToast(
   input: FlashToastInput,
@@ -110,13 +111,9 @@ export async function setFlashToast(
 }
 
 /**
- * Read + clear the staged flash toast. Returns null if nothing is staged or
- * the cookie failed to verify. The clear is staged unconditionally so a
+ * Read + clear the staged flash toast. Returns `null` if nothing is staged
+ * or the cookie failed to verify. The clear is staged unconditionally so a
  * corrupt cookie is dropped rather than persisted across requests.
- *
- * Reads use the inbound Cookie header; writes use the outbound Set-Cookie
- * response header — the two pipes are disjoint, so concurrent
- * `setFlashToast`/`consumeFlashToast` in the same request cannot collide.
  */
 export async function consumeFlashToast(): Promise<FlashToast | null> {
   const sealed = tssGetCookie(config.name)
@@ -128,12 +125,10 @@ export async function consumeFlashToast(): Promise<FlashToast | null> {
 }
 
 /**
- * Server-fn wrapper around `consumeFlashToast`. The RPC seam route loaders
- * use because they live in client-bundled `.tsx` files — TSS's
- * import-protection plugin rejects direct server-only imports from those.
+ * Server-fn wrapper around `consumeFlashToast`, callable from
+ * client-bundled root loaders.
  *
- * Wire it from your `__root.tsx` loader:
- *
+ * @example
  * ```ts
  * export const Route = createRootRoute({
  *   loader: async () => ({ flashToast: await consumeFlashToastFn() }),
@@ -147,9 +142,13 @@ export const consumeFlashToastFn = createServerFn({ method: 'POST' }).handler(
 
 /**
  * Stage a flash toast and throw a TanStack Router redirect to `href` in
- * one call. Returns `Promise<never>` so TS knows code after the call is
- * unreachable. Mirrors `remix-toast`'s `redirectWithToast(url, toast)`,
- * adapted for TSS's throw-based redirect model.
+ * one call. The `Promise<never>` return type lets TypeScript infer that
+ * code after the call is unreachable.
+ *
+ * @example
+ * ```ts
+ * await redirectWithSuccess('/dashboard', 'Logged in!')
+ * ```
  */
 export async function redirectWithToast(
   href: string,
@@ -193,10 +192,9 @@ export async function redirectWithWarning(
 
 /**
  * Stage a flash toast and replace the current history entry with `href`.
- * Same semantics as `redirectWith*` but uses `replace: true` so the back
- * button doesn't return to the current URL — useful after form mutations
- * where re-submitting on back would be wrong. Mirrors `remix-toast`'s
- * `replaceWithToast` family.
+ * Same as `redirectWith*` but uses `replace: true` so the back button
+ * doesn't return to the current URL — useful after form mutations where
+ * re-submitting on back would be wrong.
  */
 export async function replaceWithToast(
   href: string,
@@ -244,24 +242,24 @@ interface FlashToastEffectProps {
   /** The toast surfaced by your root loader, or `null` when none is staged. */
   toast: FlashToast | null
   /**
-   * Callback that hands the toast to your toast UI. Typical bindings:
-   * `(t) => sonner[t.type](t.message, t)` for sonner; `(t) => toast(t.message)`
-   * for react-toastify; or your own component imperative API.
+   * Callback that hands the toast to your toast UI.
    *
-   * **Source-order constraint:** if your toast UI subscribes lazily (sonner,
-   * react-toastify, etc.), render its `<Toaster>` BEFORE this component in
-   * your JSX tree. React commits sibling effects in source order, so this
-   * component's `notify(...)` would otherwise fire before any subscriber
-   * exists and the toast would be silently dropped.
+   * **Source-order constraint:** if your toast UI subscribes lazily, render
+   * its `<Toaster>` BEFORE this component in the JSX tree. React commits
+   * sibling effects in source order; if `notify` fires before any
+   * subscriber has mounted, the toast is silently dropped. Use
+   * `<ToastProvider>` to avoid this.
    */
   notify: (toast: FlashToast) => void
 }
 
 /**
- * Drop-in renderer that fires loader-surfaced flash toasts through any toast
- * UI. Effect-only — renders nothing. Dedupes by `_id` via sessionStorage so
- * the same toast never re-fires across re-renders, hydration, or
- * within-TTL refreshes.
+ * Effect-only renderer that fires loader-surfaced flash toasts through any
+ * toast UI. Renders nothing. Dedupes by `_id` via `sessionStorage` so the
+ * same toast never re-fires across re-renders, hydration, or within-TTL
+ * refreshes.
+ *
+ * Reach for `<ToastProvider>` if you want the source-order rule baked in.
  */
 export function FlashToastEffect({
   toast,
@@ -281,5 +279,47 @@ export function FlashToastEffect({
     notify(toast)
   }, [toast, notify])
   return null
+}
+
+interface ToastProviderProps {
+  /** Your toast UI's renderer node. Mounted first so the lazy subscriber is ready before `notify` fires. */
+  toaster: ReactNode
+  /** The toast surfaced by your root loader, or `null` when none is staged. */
+  toast: FlashToast | null
+  /** Callback that hands the toast to your toast UI. */
+  notify: (toast: FlashToast) => void
+  children?: ReactNode
+}
+
+/**
+ * Composes the toast UI's renderer + `<FlashToastEffect />` in the correct
+ * source order so the source-order footgun cannot misfire. Use this for the
+ * safe default; reach for `<FlashToastEffect />` directly when you need
+ * explicit control over where each piece sits in the tree.
+ *
+ * @example
+ * ```tsx
+ * <ToastProvider
+ *   toaster={<Toaster />}
+ *   toast={loaderData.flashToast}
+ *   notify={(t) => toast[t.type](t.message, t)}
+ * >
+ *   <Outlet />
+ * </ToastProvider>
+ * ```
+ */
+export function ToastProvider({
+  toaster,
+  toast,
+  notify,
+  children,
+}: ToastProviderProps) {
+  return (
+    <>
+      {toaster}
+      <FlashToastEffect toast={toast} notify={notify} />
+      {children}
+    </>
+  )
 }
 

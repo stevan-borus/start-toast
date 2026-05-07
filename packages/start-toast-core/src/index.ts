@@ -1,11 +1,7 @@
 import { seal, unseal } from 'iron-webcrypto'
 import { z } from 'zod'
 
-/**
- * Wire format for a flash toast on the cookie. Mirrors `remix-toast`'s
- * `toastMessageSchema` plus an internal `_id` used for sessionStorage-keyed
- * dedupe at render time.
- */
+/** Wire format for a flash toast on the cookie. */
 export const flashToastSchema = z.object({
   message: z.string(),
   type: z.enum(['info', 'success', 'error', 'warning']),
@@ -17,18 +13,12 @@ export const flashToastSchema = z.object({
 export type FlashToast = z.infer<typeof flashToastSchema>
 export type FlashToastType = FlashToast['type']
 
-/**
- * Public input — everything except `_id` (assigned by `setFlashToast`).
- */
+/** Public input shape — everything except `_id` (assigned at stage time). */
 export type FlashToastInput =
   | string
   | (Omit<FlashToast, '_id' | 'type'> & { type?: FlashToastType })
 
-/**
- * Generate the internal `_id` stamped on every toast. The renderer uses it as
- * a sessionStorage key to dedupe re-fires across re-renders or the within-TTL
- * refresh window.
- */
+/** Generate the dedupe-key stamped on every staged toast. */
 export function makeFlashToastId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 }
@@ -51,10 +41,7 @@ const SEAL_DEFAULTS = {
   localtimeOffsetMsec: 0,
 } as const
 
-/**
- * Encrypt + sign a toast for storage in a cookie. Returns a string with the
- * Iron `Fe26.2*` prefix.
- */
+/** Encrypt + sign a `FlashToast` for storage in a cookie. */
 export async function sealToast(
   toast: FlashToast,
   password: string,
@@ -63,9 +50,9 @@ export async function sealToast(
 }
 
 /**
- * Decrypt + verify a sealed toast. Returns `null` on any failure mode
- * (malformed, wrong password, expired, schema mismatch). Flash toasts are
- * best-effort — never throw past the caller.
+ * Decrypt + verify a sealed cookie. Returns `null` on any failure mode
+ * (malformed, wrong password, expired, schema mismatch) — flash toasts
+ * are best-effort and never throw past the caller.
  */
 export async function unsealToast(
   sealed: string,
@@ -80,13 +67,7 @@ export async function unsealToast(
   }
 }
 
-/**
- * Coerce the public input shape to a canonical, _id-less toast.
- *
- * - String input → `{ message, type: defaultType }`
- * - Object input with explicit `type` → preserved
- * - Object input without `type` → falls back to `defaultType`
- */
+/** Coerce the public input shape to a canonical, `_id`-less toast. */
 export function normalizeFlashInput(
   input: FlashToastInput,
   defaultType: FlashToastType,
