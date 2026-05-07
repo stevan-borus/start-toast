@@ -87,11 +87,13 @@ const config: InternalConfig = {
  * ```
  */
 export function setFlashCookieOptions(opts: FlashCookieOptions): void {
-  for (const [key, value] of Object.entries(opts)) {
-    if (value !== undefined) {
-      ;(config as unknown as Record<string, unknown>)[key] = value
-    }
-  }
+  if (opts.secret !== undefined) config.secret = opts.secret
+  if (opts.name !== undefined) config.name = opts.name
+  if (opts.maxAge !== undefined) config.maxAge = opts.maxAge
+  if (opts.path !== undefined) config.path = opts.path
+  if (opts.sameSite !== undefined) config.sameSite = opts.sameSite
+  if (opts.secure !== undefined) config.secure = opts.secure
+  if (opts.httpOnly !== undefined) config.httpOnly = opts.httpOnly
 }
 
 function resolveSecret(): string {

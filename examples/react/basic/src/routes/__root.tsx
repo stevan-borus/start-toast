@@ -10,9 +10,6 @@ import {
 } from '@tanstack/react-start-toast'
 import type { ReactNode } from 'react'
 
-// The lib reads START_TOAST_SECRET from the server environment on first
-// use — no setup call needed here. See `.env.example`.
-
 export const Route = createRootRoute({
   head: () => ({
     meta: [
