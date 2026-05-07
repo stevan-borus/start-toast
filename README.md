@@ -128,6 +128,43 @@ await setFlashToast({ message: 'Saved', type: 'success' })
 return data
 ```
 
+### 5. Trigger from a full navigation
+
+Flash toasts work via a cookie set on one response and read on the next request. That two-request handshake means the trigger has to be a **full page navigation** — not a client-side router transition.
+
+The patterns that already are full navigations:
+
+- HTML form submissions (login, signup, settings save, etc.)
+- OAuth callback redirects
+- Email verification link clicks
+- Sign-out forms
+
+If you trigger a `redirectWith*` from a client-side `<Link>` click or a `useMutation` without an explicit page navigation on success, the destination loader runs before the browser commits the flash cookie, and the toast doesn't fire until refresh. **For client-side actions, fire your toast UI directly in the mutation's `onSuccess` callback** — the cookie-bridge isn't the right tool for that case.
+
+```html
+<!-- ✅ Form submission — full navigation, cookie commits, toast fires -->
+<form method="POST" action="/login">
+  ...
+</form>
+```
+
+```ts
+// ✅ Mutation that does an explicit full nav on success
+const mutation = useMutation({
+  mutationFn: () => loginFn({ data }),
+  onSuccess: () => {
+    window.location.href = '/dashboard'  // or router.navigate({ to, reloadDocument: true })
+  },
+})
+```
+
+```tsx
+// ❌ Client-side <Link> through a redirect-throwing loader — race; toast won't show until refresh
+<Link to="/trigger">Go</Link>
+```
+
+The example app's index page is a form submission to demonstrate this exactly.
+
 ## API reference
 
 ### `/server` (server-only)

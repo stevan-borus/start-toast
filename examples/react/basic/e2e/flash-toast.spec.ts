@@ -1,26 +1,22 @@
 import { test, expect, type Page } from '@playwright/test'
 
-// Each button on `/` triggers a server fn that ends in
-// `redirectWith*('/redirected', ...)` or `replaceWith*('/redirected', ...)`.
-// The redirect lands on `/redirected`, the root loader consumes the flash
-// cookie via `consumeFlashToastFn`, and `FlashToastEffect` invokes the
-// example's `notify` (which appends a `data-testid="toast-row"` to the feed
-// with `data-type` set to the toast's type). We assert on that.
+// The example app's `/` is a form whose action is `/trigger?type=...`. The
+// trigger route's loader calls one of the `redirectWith*` or
+// `replaceWith*` helpers, which throws a TSS redirect to `/redirected` with
+// the flash cookie staged on the response. The next request (the redirect
+// target) replays the cookie, the root loader consumes it via
+// `consumeFlashToastFn`, and `FlashToastEffect` appends a row to the
+// `toast-feed` div with `data-type` set. We assert on that row.
 
-async function clickAndExpectToast(
+async function gotoTriggerAndExpectToast(
   page: Page,
-  testId: string,
+  triggerType: string,
   expectedType: 'success' | 'error' | 'info' | 'warning',
   expectedMessage: string,
 ) {
-  // Use a direct page.goto on the trigger href so the redirect happens at
-  // the SSR boundary — the destination's __root loader runs on a fresh
-  // request and consumes the flash cookie. Client-side <Link> navigation
-  // hands the redirect-throw to the router on the client, which navigates
-  // without re-running the destination's loader, so the cookie never gets
-  // consumed and no toast fires.
-  const triggerHref = `/trigger/${testId.replace(/^btn-/, '')}`
-  await page.goto(triggerHref)
+  // Direct goto exercises the same SSR + cookie-bridge path the form
+  // submission would take, with one less click for cheaper coverage.
+  await page.goto(`/trigger?type=${triggerType}`)
   await page.waitForURL('**/redirected')
 
   const row = page.getByTestId('toast-row').last()
@@ -33,36 +29,36 @@ test.describe('redirectWith* helpers', () => {
   test('redirectWithSuccess fires a success toast on /redirected', async ({
     page,
   }) => {
-    await clickAndExpectToast(
+    await gotoTriggerAndExpectToast(
       page,
-      'btn-redirect-success',
+      'redirect-success',
       'success',
       'Saved your preferences',
     )
   })
 
   test('redirectWithError fires an error toast', async ({ page }) => {
-    await clickAndExpectToast(
+    await gotoTriggerAndExpectToast(
       page,
-      'btn-redirect-error',
+      'redirect-error',
       'error',
       'Something went wrong',
     )
   })
 
   test('redirectWithInfo fires an info toast', async ({ page }) => {
-    await clickAndExpectToast(
+    await gotoTriggerAndExpectToast(
       page,
-      'btn-redirect-info',
+      'redirect-info',
       'info',
       'maintenance window',
     )
   })
 
   test('redirectWithWarning fires a warning toast', async ({ page }) => {
-    await clickAndExpectToast(
+    await gotoTriggerAndExpectToast(
       page,
-      'btn-redirect-warning',
+      'redirect-warning',
       'warning',
       'unsaved changes',
     )
@@ -71,9 +67,9 @@ test.describe('redirectWith* helpers', () => {
   test('redirectWithToast (object input, default info) fires an info toast', async ({
     page,
   }) => {
-    await clickAndExpectToast(
+    await gotoTriggerAndExpectToast(
       page,
-      'btn-redirect-generic',
+      'redirect-generic',
       'info',
       'Generic toast',
     )
@@ -82,31 +78,36 @@ test.describe('redirectWith* helpers', () => {
 
 test.describe('replaceWith* helpers', () => {
   test('replaceWithSuccess fires a success toast', async ({ page }) => {
-    await clickAndExpectToast(
+    await gotoTriggerAndExpectToast(
       page,
-      'btn-replace-success',
+      'replace-success',
       'success',
       'Replaced + success',
     )
   })
 
   test('replaceWithError fires an error toast', async ({ page }) => {
-    await clickAndExpectToast(
+    await gotoTriggerAndExpectToast(
       page,
-      'btn-replace-error',
+      'replace-error',
       'error',
       'Replaced + error',
     )
   })
 
   test('replaceWithInfo fires an info toast', async ({ page }) => {
-    await clickAndExpectToast(page, 'btn-replace-info', 'info', 'Replaced + info')
+    await gotoTriggerAndExpectToast(
+      page,
+      'replace-info',
+      'info',
+      'Replaced + info',
+    )
   })
 
   test('replaceWithWarning fires a warning toast', async ({ page }) => {
-    await clickAndExpectToast(
+    await gotoTriggerAndExpectToast(
       page,
-      'btn-replace-warning',
+      'replace-warning',
       'warning',
       'Replaced + warning',
     )
@@ -115,12 +116,31 @@ test.describe('replaceWith* helpers', () => {
   test('replaceWithToast (object input, default info) fires an info toast', async ({
     page,
   }) => {
-    await clickAndExpectToast(
+    await gotoTriggerAndExpectToast(
       page,
-      'btn-replace-generic',
+      'replace-generic',
       'info',
       'Replaced + generic',
     )
+  })
+})
+
+test.describe('form submission (canonical flow)', () => {
+  test('selecting a radio + submitting the form fires the toast', async ({
+    page,
+  }) => {
+    // The form on `/` is the realistic shape — it's exactly what an auth
+    // flow / settings save / OAuth callback looks like. This test proves
+    // the form path works, not just direct URL hits.
+    await page.goto('/')
+    await page.getByTestId('btn-redirect-error').check()
+    await page.getByTestId('submit-trigger').click()
+    await page.waitForURL('**/redirected')
+
+    const row = page.getByTestId('toast-row').last()
+    await expect(row).toBeVisible({ timeout: 5_000 })
+    await expect(row).toHaveAttribute('data-type', 'error')
+    await expect(row).toContainText('Something went wrong')
   })
 })
 
@@ -128,7 +148,7 @@ test.describe('cookie clearing semantics', () => {
   test('refreshing /redirected does NOT re-fire the toast (cookie was cleared)', async ({
     page,
   }) => {
-    await page.goto('/trigger/redirect-success')
+    await page.goto('/trigger?type=redirect-success')
     await page.waitForURL('**/redirected')
 
     // First toast appeared (wait for the useEffect that appends the row)

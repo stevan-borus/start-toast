@@ -1,74 +1,84 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
   component: IndexComponent,
 })
+
+const REDIRECT_OPTIONS = [
+  { value: 'redirect-success', label: 'redirectWithSuccess' },
+  { value: 'redirect-error', label: 'redirectWithError' },
+  { value: 'redirect-info', label: 'redirectWithInfo' },
+  { value: 'redirect-warning', label: 'redirectWithWarning' },
+  { value: 'redirect-generic', label: 'redirectWithToast (object input)' },
+] as const
+
+const REPLACE_OPTIONS = [
+  { value: 'replace-success', label: 'replaceWithSuccess' },
+  { value: 'replace-error', label: 'replaceWithError' },
+  { value: 'replace-info', label: 'replaceWithInfo' },
+  { value: 'replace-warning', label: 'replaceWithWarning' },
+  { value: 'replace-generic', label: 'replaceWithToast (object input)' },
+] as const
 
 function IndexComponent() {
   return (
     <main>
       <h1>react-start-toast example</h1>
       <p>
-        Each link navigates to a <code>/trigger/$type</code> route whose
+        The form below submits to <code>/trigger?type=…</code>. That route's
         loader calls one of the <code>redirectWith*</code> or{' '}
-        <code>replaceWith*</code> helpers. The helper throws a TSS redirect to{' '}
-        <code>/redirected</code>, where the toast fires once via{' '}
-        <code>FlashToastEffect</code>. <code>replaceWith*</code> uses{' '}
-        <code>history.replace</code>, so the browser back button skips the
-        trigger page.
+        <code>replaceWith*</code> helpers, which throws a TSS redirect to{' '}
+        <code>/redirected</code> with the flash cookie staged on the
+        response. The next request — the redirect target — replays the
+        cookie, the root loader unseals it via{' '}
+        <code>consumeFlashToastFn</code>, and{' '}
+        <code>FlashToastEffect</code> fires the toast once.
       </p>
-      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            maxWidth: 320,
-          }}
-        >
-          <strong>redirectWith* (push)</strong>
-          <Link to="/trigger/$type" params={{ type: 'redirect-success' }} data-testid="btn-redirect-success">
-            redirectWithSuccess
-          </Link>
-          <Link to="/trigger/$type" params={{ type: 'redirect-error' }} data-testid="btn-redirect-error">
-            redirectWithError
-          </Link>
-          <Link to="/trigger/$type" params={{ type: 'redirect-info' }} data-testid="btn-redirect-info">
-            redirectWithInfo
-          </Link>
-          <Link to="/trigger/$type" params={{ type: 'redirect-warning' }} data-testid="btn-redirect-warning">
-            redirectWithWarning
-          </Link>
-          <Link to="/trigger/$type" params={{ type: 'redirect-generic' }} data-testid="btn-redirect-generic">
-            redirectWithToast (object input)
-          </Link>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            maxWidth: 320,
-          }}
-        >
-          <strong>replaceWith* (no history entry)</strong>
-          <Link to="/trigger/$type" params={{ type: 'replace-success' }} data-testid="btn-replace-success">
-            replaceWithSuccess
-          </Link>
-          <Link to="/trigger/$type" params={{ type: 'replace-error' }} data-testid="btn-replace-error">
-            replaceWithError
-          </Link>
-          <Link to="/trigger/$type" params={{ type: 'replace-info' }} data-testid="btn-replace-info">
-            replaceWithInfo
-          </Link>
-          <Link to="/trigger/$type" params={{ type: 'replace-warning' }} data-testid="btn-replace-warning">
-            replaceWithWarning
-          </Link>
-          <Link to="/trigger/$type" params={{ type: 'replace-generic' }} data-testid="btn-replace-generic">
-            replaceWithToast (object input)
-          </Link>
-        </div>
-      </div>
+      <p style={{ fontSize: '0.875rem', color: '#666' }}>
+        This is the canonical flash-toast shape: a form submission (or any
+        full-page navigation — OAuth callback, sign-out, email
+        verification link) hits a server-side handler that stages the
+        cookie before redirecting. Pure-client navigation through a
+        redirect-throwing loader doesn't work — the destination loader
+        runs before the browser commits the cookie. If you find yourself
+        wanting a flash toast on a client-side action, fire your toast UI
+        directly in the mutation's <code>onSuccess</code> instead.
+      </p>
+      <form
+        method="GET"
+        action="/trigger"
+        style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 480 }}
+      >
+        <fieldset>
+          <legend>
+            <strong>redirectWith*</strong> — adds a history entry
+          </legend>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+            {REDIRECT_OPTIONS.map(({ value, label }) => (
+              <label key={value} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="radio" name="type" value={value} data-testid={`btn-${value}`} />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>
+            <strong>replaceWith*</strong> — replaces the current entry, back button skips it
+          </legend>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+            {REPLACE_OPTIONS.map(({ value, label }) => (
+              <label key={value} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="radio" name="type" value={value} data-testid={`btn-${value}`} />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <button type="submit" data-testid="submit-trigger" style={{ padding: '8px 16px', fontSize: 14 }}>
+          Submit
+        </button>
+      </form>
     </main>
   )
 }
