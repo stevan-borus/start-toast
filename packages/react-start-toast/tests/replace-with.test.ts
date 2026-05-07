@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import { unsealToast } from '@tanstack/start-toast-core'
 import {
   setCookieMock,
   redirectMock,
@@ -12,7 +13,7 @@ import {
   replaceWithInfo,
   replaceWithWarning,
   setFlashCookieOptions,
-} from '../src/index.js'
+} from '../src/server.js'
 
 beforeEach(() => {
   resetMocks()
@@ -52,4 +53,25 @@ describe('replaceWith* helpers', () => {
     expect(redirectMock).toHaveBeenCalledTimes(1)
     expect(redirectMock.mock.calls[0]![0]).toMatchObject({ replace: true })
   })
+
+  it.each([
+    ['replaceWithSuccess', () => replaceWithSuccess('/x', 'm'), 'success'],
+    ['replaceWithError', () => replaceWithError('/x', 'm'), 'error'],
+    ['replaceWithInfo', () => replaceWithInfo('/x', 'm'), 'info'],
+    ['replaceWithWarning', () => replaceWithWarning('/x', 'm'), 'warning'],
+    [
+      'replaceWithToast (default info)',
+      () => replaceWithToast('/x', 'm'),
+      'info',
+    ],
+  ] as const)(
+    '%s seals the correct type into the cookie',
+    async (_name, run, expectedType) => {
+      await expect(run()).rejects.toMatchObject({ __redirect: true })
+
+      const sealed = setCookieMock.mock.calls[0]![1]
+      const unsealed = await unsealToast(sealed, TEST_PASSWORD)
+      expect(unsealed?.type).toBe(expectedType)
+    },
+  )
 })

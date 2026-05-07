@@ -9,7 +9,7 @@ import {
 import {
   consumeFlashToast,
   setFlashCookieOptions,
-} from '../src/index.js'
+} from '../src/server.js'
 
 beforeEach(() => {
   resetMocks()

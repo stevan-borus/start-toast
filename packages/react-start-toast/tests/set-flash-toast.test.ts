@@ -4,7 +4,7 @@ import {
   resetMocks,
   TEST_PASSWORD,
 } from './setup'
-import { setFlashCookieOptions, setFlashToast } from '../src/index.js'
+import { setFlashCookieOptions, setFlashToast } from '../src/server.js'
 
 beforeEach(() => {
   resetMocks()
