@@ -1,0 +1,13 @@
+**/dist/**
+**/build/**
+**/.output/**
+**/.nitro/**
+**/node_modules/**
+**/coverage/**
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+**/routeTree.gen.ts
+.changeset/
+CHANGELOG.md
+**/CHANGELOG.md
