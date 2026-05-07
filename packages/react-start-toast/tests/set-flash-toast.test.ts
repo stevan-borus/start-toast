@@ -33,5 +33,16 @@ describe('setFlashToast', () => {
     expect(setCookieMock.mock.calls[0]![0]).toBe('my-custom-flash')
     setFlashCookieOptions({ name: '__start_toast' }) // reset for other tests
   })
+
+  it('ignores undefined values in setFlashCookieOptions (no-op overwrite)', async () => {
+    // Simulates the "import in both client and server bundles" pattern,
+    // where process.env.SESSION_SECRET resolves to a real string in the
+    // server bundle and to undefined in the client bundle. The client-side
+    // call must not wipe the server-set secret.
+    setFlashCookieOptions({ secret: undefined })
+    // setFlashToast still seals successfully — proves the secret survived.
+    await setFlashToast('Still works')
+    expect(setCookieMock.mock.calls[0]![1]).toMatch(/^Fe26\.2\*/)
+  })
 })
 
