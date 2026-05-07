@@ -1,0 +1,53 @@
+{
+  "name": "@tanstack/start-toast-core",
+  "version": "0.0.1",
+  "description": "Framework-agnostic primitives for server-set flash toasts. The shared core that powers @tanstack/react-start-toast (and future Solid/Vue adapters).",
+  "author": "Stevan Borus",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stevan-borus/start-toast.git",
+    "directory": "packages/start-toast-core"
+  },
+  "homepage": "https://github.com/stevan-borus/start-toast",
+  "keywords": [
+    "tanstack",
+    "tanstack-start",
+    "toast",
+    "flash",
+    "cookie",
+    "remix-toast"
+  ],
+  "scripts": {
+    "clean": "premove ./build ./dist",
+    "lint:fix": "eslint ./src --fix",
+    "test:eslint": "eslint ./src",
+    "test:lib": "vitest",
+    "test:lib:dev": "pnpm test:lib --watch",
+    "test:types": "tsc",
+    "build": "tsdown"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist/",
+    "src"
+  ],
+  "dependencies": {
+    "iron-webcrypto": "^1.2.1",
+    "zod": "^4.0.0"
+  }
+}

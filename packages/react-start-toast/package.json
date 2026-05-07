@@ -1,0 +1,66 @@
+{
+  "name": "@tanstack/react-start-toast",
+  "version": "0.0.1",
+  "description": "Server-set toast notifications for TanStack Start. A 1:1 adaptation of remix-toast for TSS server fns and h3 cookies.",
+  "author": "Stevan Borus",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stevan-borus/start-toast.git",
+    "directory": "packages/react-start-toast"
+  },
+  "homepage": "https://github.com/stevan-borus/start-toast",
+  "keywords": [
+    "tanstack",
+    "tanstack-start",
+    "react",
+    "toast",
+    "flash",
+    "cookie",
+    "remix-toast"
+  ],
+  "scripts": {
+    "clean": "premove ./build ./dist",
+    "lint:fix": "pnpm -w exec eslint \"$INIT_CWD/src\" --fix",
+    "test:eslint": "pnpm -w exec eslint \"$INIT_CWD/src\"",
+    "test:lib": "vitest --passWithNoTests",
+    "test:lib:dev": "pnpm test:lib --watch",
+    "test:types": "tsc",
+    "build": "tsdown"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@tanstack/start-toast-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@tanstack/react-router": "^1.167.0",
+    "@tanstack/react-start": "^1.167.0",
+    "@types/react": "^19.2.14",
+    "@vitejs/plugin-react": "^6.0.1",
+    "react": "^19.2.5"
+  },
+  "peerDependencies": {
+    "@tanstack/react-router": ">=1.167.0",
+    "@tanstack/react-start": ">=1.167.0",
+    "react": ">=18",
+    "react-dom": ">=18"
+  }
+}

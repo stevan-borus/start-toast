@@ -1,0 +1,49 @@
+{
+  "name": "root",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stevan-borus/start-toast.git"
+  },
+  "packageManager": "pnpm@10.33.2",
+  "type": "module",
+  "scripts": {
+    "build": "nx run-many --targets=build --exclude=examples/**",
+    "build:all": "nx run-many --targets=build --exclude=examples/**",
+    "changeset": "changeset",
+    "changeset:publish": "changeset publish",
+    "changeset:version": "changeset version && pnpm install --no-frozen-lockfile && pnpm format",
+    "clean": "find . -name 'dist' -type d -prune -exec rm -rf {} +",
+    "clean:node_modules": "find . -name 'node_modules' -type d -prune -exec rm -rf {} +",
+    "clean:all": "pnpm run clean && pnpm run clean:node_modules",
+    "format": "prettier --experimental-cli --ignore-unknown '**/*' --write",
+    "lint": "nx run-many --target=test:eslint --exclude=examples/**",
+    "lint:fix": "nx run-many --targets=lint:fix --exclude=examples/**",
+    "test": "pnpm run test:ci",
+    "test:ci": "nx run-many --targets=test:eslint,test:lib,test:types,build",
+    "test:eslint": "nx run-many --target=test:eslint --exclude=examples/**",
+    "test:lib": "nx run-many --targets=test:lib --exclude=examples/**",
+    "test:types": "nx run-many --targets=test:types --exclude=examples/**",
+    "typecheck": "pnpm run test:types"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@svitejs/changesets-changelog-github-compact": "^1.2.0",
+    "@tanstack/eslint-config": "0.4.0",
+    "@types/node": "^25.6.0",
+    "eslint": "^10.3.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "happy-dom": "^20.9.0",
+    "nx": "^22.7.1",
+    "premove": "^4.0.0",
+    "prettier": "^3.8.3",
+    "publint": "^0.3.18",
+    "tsdown": "^0.21.10",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.5"
+  },
+  "overrides": {
+    "@tanstack/start-toast-core": "workspace:*",
+    "@tanstack/react-start-toast": "workspace:*"
+  }
+}
