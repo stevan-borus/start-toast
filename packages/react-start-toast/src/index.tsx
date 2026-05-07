@@ -59,13 +59,22 @@ const config: Required<FlashCookieOptions> = {
  * helper picks up the new config. Throws on first staging call if `secret`
  * is still the placeholder default.
  *
+ * Safe to call from a module bundled in both client and server contexts:
+ * `undefined` values are skipped, so a client-side
+ * `setFlashCookieOptions({ secret: process.env.SESSION_SECRET })` (where
+ * the env var is `undefined`) won't clobber the server-set secret.
+ *
  * @example
  * ```ts
  * setFlashCookieOptions({ secret: process.env.SESSION_SECRET })
  * ```
  */
 export function setFlashCookieOptions(opts: FlashCookieOptions): void {
-  Object.assign(config, opts)
+  for (const [key, value] of Object.entries(opts)) {
+    if (value !== undefined) {
+      ;(config as Record<string, unknown>)[key] = value
+    }
+  }
 }
 
 function ensureSecret(): string {
