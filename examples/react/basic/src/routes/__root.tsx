@@ -4,10 +4,8 @@ import {
   Scripts,
   createRootRoute,
 } from '@tanstack/react-router'
-import {
-  FlashToastEffect,
-  consumeFlashToastFn,
-} from '@tanstack/react-start-toast'
+import { FlashToastEffect } from '@tanstack/react-start-toast'
+import { consumeFlashToastFn } from '../flash-toast.functions'
 import type { ReactNode } from 'react'
 
 export const Route = createRootRoute({

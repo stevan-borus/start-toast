@@ -1,33 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import {
-  redirectWithError,
-  redirectWithInfo,
-  redirectWithSuccess,
-  redirectWithToast,
-  redirectWithWarning,
-} from '@tanstack/react-start-toast'
-
-const triggerSuccessFn = createServerFn({ method: 'POST' }).handler(
-  async () => redirectWithSuccess('/redirected', 'Saved your preferences'),
-)
-const triggerErrorFn = createServerFn({ method: 'POST' }).handler(
-  async () => redirectWithError('/redirected', 'Something went wrong'),
-)
-const triggerInfoFn = createServerFn({ method: 'POST' }).handler(
-  async () => redirectWithInfo('/redirected', 'FYI: maintenance window 9pm'),
-)
-const triggerWarningFn = createServerFn({ method: 'POST' }).handler(
-  async () => redirectWithWarning('/redirected', 'Heads up — unsaved changes'),
-)
-const triggerGenericFn = createServerFn({ method: 'POST' }).handler(
-  async () =>
-    redirectWithToast('/redirected', {
-      message: 'Generic toast',
-      description: 'Defaults to type=info',
-      duration: 4000,
-    }),
-)
+import { Link, createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
   component: IndexComponent,
@@ -38,27 +9,65 @@ function IndexComponent() {
     <main>
       <h1>react-start-toast example</h1>
       <p>
-        Each button triggers a server fn that calls one of the
-        <code> redirectWith* </code> helpers, then this page is replaced by
-        <code> /redirected </code>, where the toast fires once via
-        <code> FlashToastEffect </code>.
+        Each link navigates to a <code>/trigger/$type</code> route whose
+        loader calls one of the <code>redirectWith*</code> or{' '}
+        <code>replaceWith*</code> helpers. The helper throws a TSS redirect to{' '}
+        <code>/redirected</code>, where the toast fires once via{' '}
+        <code>FlashToastEffect</code>. <code>replaceWith*</code> uses{' '}
+        <code>history.replace</code>, so the browser back button skips the
+        trigger page.
       </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 320 }}>
-        <button data-testid="btn-success" onClick={() => triggerSuccessFn()}>
-          redirectWithSuccess
-        </button>
-        <button data-testid="btn-error" onClick={() => triggerErrorFn()}>
-          redirectWithError
-        </button>
-        <button data-testid="btn-info" onClick={() => triggerInfoFn()}>
-          redirectWithInfo
-        </button>
-        <button data-testid="btn-warning" onClick={() => triggerWarningFn()}>
-          redirectWithWarning
-        </button>
-        <button data-testid="btn-generic" onClick={() => triggerGenericFn()}>
-          redirectWithToast (object input)
-        </button>
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            maxWidth: 320,
+          }}
+        >
+          <strong>redirectWith* (push)</strong>
+          <Link to="/trigger/$type" params={{ type: 'redirect-success' }} data-testid="btn-redirect-success">
+            redirectWithSuccess
+          </Link>
+          <Link to="/trigger/$type" params={{ type: 'redirect-error' }} data-testid="btn-redirect-error">
+            redirectWithError
+          </Link>
+          <Link to="/trigger/$type" params={{ type: 'redirect-info' }} data-testid="btn-redirect-info">
+            redirectWithInfo
+          </Link>
+          <Link to="/trigger/$type" params={{ type: 'redirect-warning' }} data-testid="btn-redirect-warning">
+            redirectWithWarning
+          </Link>
+          <Link to="/trigger/$type" params={{ type: 'redirect-generic' }} data-testid="btn-redirect-generic">
+            redirectWithToast (object input)
+          </Link>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            maxWidth: 320,
+          }}
+        >
+          <strong>replaceWith* (no history entry)</strong>
+          <Link to="/trigger/$type" params={{ type: 'replace-success' }} data-testid="btn-replace-success">
+            replaceWithSuccess
+          </Link>
+          <Link to="/trigger/$type" params={{ type: 'replace-error' }} data-testid="btn-replace-error">
+            replaceWithError
+          </Link>
+          <Link to="/trigger/$type" params={{ type: 'replace-info' }} data-testid="btn-replace-info">
+            replaceWithInfo
+          </Link>
+          <Link to="/trigger/$type" params={{ type: 'replace-warning' }} data-testid="btn-replace-warning">
+            replaceWithWarning
+          </Link>
+          <Link to="/trigger/$type" params={{ type: 'replace-generic' }} data-testid="btn-replace-generic">
+            replaceWithToast (object input)
+          </Link>
+        </div>
       </div>
     </main>
   )
