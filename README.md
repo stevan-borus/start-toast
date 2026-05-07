@@ -16,6 +16,8 @@ If you've used `remix-toast`, you already know the API — `setFlashToast`, `red
 
 ## Quick taste
 
+Set `START_TOAST_SECRET` in your server environment (≥32 characters) — that's the only setup. Then:
+
 ```tsx
 // In a server fn / beforeLoad / loader:
 import { redirectWithSuccess } from '@tanstack/react-start-toast'
@@ -27,11 +29,8 @@ await redirectWithSuccess('/dashboard', 'Logged in!')
 // In __root.tsx:
 import {
   consumeFlashToastFn,
-  setFlashCookieOptions,
   ToastProvider,
 } from '@tanstack/react-start-toast'
-
-setFlashCookieOptions({ secret: process.env.SESSION_SECRET })
 
 export const Route = createRootRoute({
   loader: async () => ({ flashToast: await consumeFlashToastFn() }),
@@ -51,6 +50,22 @@ export const Route = createRootRoute({
 ```
 
 A working end-to-end example lives in [`examples/react/basic`](./examples/react/basic).
+
+## Advanced
+
+`setFlashCookieOptions` overrides any default — cookie name, max-age, the secret itself, or how the secret is resolved (e.g. for runtime stores like Vault).
+
+```ts
+import { setFlashCookieOptions } from '@tanstack/react-start-toast'
+
+setFlashCookieOptions({
+  name: 'my-flash',
+  maxAge: 30,
+  secret: () => myVault.read('flash-secret'), // string or thunk
+})
+```
+
+The secret is resolved lazily on first use; the env var name is `START_TOAST_SECRET`. Precedence: explicit config > env var > throw.
 
 ## Packages
 
