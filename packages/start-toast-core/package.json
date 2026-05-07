@@ -47,7 +47,7 @@
     "src"
   ],
   "dependencies": {
-    "iron-webcrypto": "^1.2.1",
+    "iron-webcrypto": "^2.0.0",
     "zod": "^4.0.0"
   }
 }
