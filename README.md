@@ -149,7 +149,7 @@ The patterns that already are full navigations:
 - Email verification link clicks
 - Sign-out forms
 
-If you trigger a `redirectWith*` from a client-side `<Link>` click or a `useMutation` callback, the destination loader runs before the browser commits the flash cookie, and the toast doesn't fire until refresh. **For client-side actions, fire your toast UI directly in the mutation's `onSuccess`** — `toast.success('Saved')` straight to sonner, no cookie involved. The cookie bridge exists for full-navigation flows; if your trigger is already in client land, you don't need it.
+If you trigger a `redirectWith*` from a client-side `<Link>` click or a `useMutation` callback, the destination loader's consume-fetch races the browser's cookie commit and **the toast is silently dropped** — no error, just nothing. The user clicks, sees the destination page, never knows a toast was meant to fire. **For client-side actions, fire your toast UI directly in the mutation's `onSuccess`** — `toast.success('Saved')` straight to sonner, no cookie involved. The cookie bridge exists for full-navigation flows; if your trigger is already in client land, you don't need it.
 
 ```html
 <!-- ✅ Form submission — full navigation, cookie commits, toast fires -->
@@ -167,7 +167,7 @@ const mutation = useMutation({
 ```
 
 ```tsx
-// ❌ <Link> through a redirect-throwing loader — race; toast won't show until refresh
+// ❌ <Link> through a redirect-throwing loader — toast silently dropped
 <Link to="/trigger">Go</Link>
 ```
 
