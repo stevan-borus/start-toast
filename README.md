@@ -52,31 +52,39 @@ setFlashCookieOptions({
 
 Precedence: explicit config > env var > throw.
 
-### 2. Define a local server fn that reads the cookie
+### 2. Add a `.server.ts` re-export
 
-Each consumer defines their own `consumeFlashToastFn`. The reason: TanStack Start's compiler strips server-fn handler bodies from the client bundle per file in your source tree — but it does **not** transform pre-built lib files. A `consumeFlashToastFn` shipped from the lib would survive the transform on the client and pull h3 into the browser.
+Create one local file in your source tree that re-exports the server-only helpers you'll use. The `.server.ts` extension activates TanStack Start's import-protection plugin (matches `**/*.server.*`), which tells Vite to externalize anything imported from this file from the client bundle.
 
-The recipe is one file, ~10 lines, copy-paste from the example app:
+```ts
+// src/flash-toast-bridge.server.ts
+export {
+  consumeFlashToast,
+  redirectWithError,
+  redirectWithSuccess,
+  setFlashToast,
+  // ...whichever helpers you actually use
+} from '@tanstack/react-start-toast/server'
+```
+
+Every server-only import in the rest of your app goes through this file at the top level — no dynamic-import ceremony needed at call sites. See [Why a `.server.ts` re-export?](#why-a-serverts-re-export) below for why this matters.
+
+### 3. Define a local server fn that reads the cookie
+
+`consumeFlashToastFn` is the one RPC seam the bridge needs — your `__root.tsx` loader calls it to surface the staged toast. It's not published from the lib (TSS's compiler only strips server-fn handler bodies for files in your source tree, not pre-built lib files), so each consumer defines it locally:
 
 ```ts
 // src/flash-toast.functions.ts
 import { createServerFn } from '@tanstack/react-start'
 import type { FlashToast } from '@tanstack/react-start-toast'
+import { consumeFlashToast } from './flash-toast-bridge.server'
 
 export const consumeFlashToastFn = createServerFn({ method: 'POST' }).handler(
-  async (): Promise<FlashToast | null> => {
-    // Dynamic import keeps the server-only chain out of the client bundle.
-    const { consumeFlashToast } = await import(
-      '@tanstack/react-start-toast/server'
-    )
-    return consumeFlashToast()
-  },
+  async (): Promise<FlashToast | null> => consumeFlashToast(),
 )
 ```
 
-The dynamic `await import()` is load-bearing — see [Why a dynamic import?](#why-a-dynamic-import) below.
-
-### 3. Wire the renderer in `__root.tsx`
+### 4. Wire the renderer in `__root.tsx`
 
 ```tsx
 import { createRootRoute, Outlet, Scripts } from '@tanstack/react-router'
@@ -105,16 +113,16 @@ function RootComponent() {
 
 `<ToastProvider>` mounts the toaster first, then the bridge, so subscribe-on-mount UIs (sonner, react-toastify, etc.) are listening before the bridge fires `notify`. If you compose the pieces yourself with `<FlashToastEffect>`, the same source-order rule applies — see [Source-order constraint](#source-order-constraint).
 
-### 4. Stage toasts from server fns
+### 5. Stage toasts from server fns
+
+Top-level imports from your `.server.ts` bridge work everywhere — no per-handler dynamic imports, no special handling.
 
 ```ts
 // src/auth.functions.ts
 import { createServerFn } from '@tanstack/react-start'
+import { redirectWithSuccess } from './flash-toast-bridge.server'
 
 export const loginFn = createServerFn({ method: 'POST' }).handler(async () => {
-  const { redirectWithSuccess } = await import(
-    '@tanstack/react-start-toast/server'
-  )
   await myAuth.signIn(/* ... */)
   return redirectWithSuccess('/dashboard', 'Welcome back!')
 })
@@ -123,12 +131,14 @@ export const loginFn = createServerFn({ method: 'POST' }).handler(async () => {
 Or stage without redirecting:
 
 ```ts
-const { setFlashToast } = await import('@tanstack/react-start-toast/server')
+import { setFlashToast } from './flash-toast-bridge.server'
+
+// ...inside any server fn handler:
 await setFlashToast({ message: 'Saved', type: 'success' })
 return data
 ```
 
-### 5. Trigger from a full navigation
+### 6. Trigger from a full navigation
 
 Flash toasts work via a cookie set on one response and read on the next request. That two-request handshake means the trigger has to be a **full page navigation** — not a client-side router transition.
 
@@ -191,15 +201,33 @@ The example app's index page is a form submission to demonstrate this exactly.
 | `FlashToastInput`     | `string \| { message, type?, description?, duration? }`                | What `setFlashToast` and `redirectWith*` accept.                                       |
 | `FlashToastType`      | `'info' \| 'success' \| 'error' \| 'warning'`                          |                                                                                        |
 
-## Why a dynamic import?
+## Why a `.server.ts` re-export?
 
-The pattern `await import('@tanstack/react-start-toast/server')` inside a server-fn handler is required for any consumer file that's **also imported from a client-bundled file** (the trigger route, the root loader, anything reachable from the browser).
+A direct top-level import from `@tanstack/react-start-toast/server` from a route file or root layout — e.g. `import { consumeFlashToast } from '@tanstack/react-start-toast/server'` at the top of `__root.tsx` — crashes the production build with:
 
-TanStack Start's compiler transforms `createServerFn(...).handler(body)` so that on the client, `body` is replaced with a fetch wrapper. But the transform only rewrites the handler — it does NOT remove top-level `import` statements from the file. So a top-level `import { setFlashToast } from '@tanstack/react-start-toast/server'` survives the transform, gets bundled for the client, and pulls `node:async_hooks` into the browser.
+```
+[plugin vite:resolve] Module "node:async_hooks" has been externalized for browser compatibility,
+imported by ".../start-server-core/.../request-response.js"
+```
 
-Putting the import inside the handler body means the import is part of the dead body the transform removes. Both server fns in the [example app](./examples/react/basic) use this pattern.
+Reason: route files don't go through TanStack Start's server-fn handler-stripping transform, so any top-level import is just a regular module import. `@tanstack/react-start-toast/server` transitively imports h3 (`getCookie`/`setCookie`), which transitively imports `node:async_hooks`. The whole chain ends up in the client graph and Vite refuses to bundle the Node-only module.
 
-If your `*.functions.ts` file is only ever imported from server-bundled code (never from a route loader or `__root.tsx`), top-level imports are fine.
+The same import inside a server-fn module (`*.functions.ts`) sometimes works because TSS's compile-time transform replaces the handler body with a fetch wrapper — and if the only reference to the imported binding is inside that body, the import gets tree-shaken on the client. But that's a fragile guarantee: a single component-level reference to the binding, or a different file shape, breaks it. Empirically we've seen leaks from non-route files too.
+
+The `.server.ts` extension on a local re-export file fixes this categorically: TSS's import-protection plugin matches the `**/*.server.*` glob and tells Vite to externalize the module from client bundles entirely, regardless of what file imports it or how. Your other files import from the bridge with normal top-level `import` statements — the boundary is enforced by the `.server.ts` filename, not by per-call-site discipline or per-file luck.
+
+The example app includes a Playwright bundle-leak guard that fails CI if `AsyncLocalStorage` (or any other server-only marker) ever appears in a client asset. Worth copying if you publish your own consumer of this lib.
+
+> **Alternative — dynamic import inside the handler.** If you can't use a `.server.ts` filename for some reason (custom build configs, restricted file naming), you can move the import inside the server-fn handler body where it becomes part of the dead body the transform removes:
+>
+> ```ts
+> .handler(async () => {
+>   const { consumeFlashToast } = await import('@tanstack/react-start-toast/server')
+>   return consumeFlashToast()
+> })
+> ```
+>
+> Works, but you pay the ceremony at every call site. The `.server.ts` re-export is the recommended pattern.
 
 ## Source-order constraint
 
@@ -221,9 +249,9 @@ Subscribe-on-mount toast UIs (sonner, react-toastify, sonner-react, custom) buff
 
 A working end-to-end example lives in [`examples/react/basic`](./examples/react/basic):
 
-- All 10 helpers exercised through real navigation
-- Both `*.functions.ts` patterns (server-fn for reading, server-fn for writing)
-- Playwright e2e suite (11 tests) verifying every helper through SSR + hydration + DOM assertions
+- One `flash-toast-bridge.server.ts` re-export, two thin `*.functions.ts` files, top-level imports throughout
+- All 10 helpers exercised through real navigation (HTML form submission)
+- Playwright e2e suite (12 tests) verifying every helper through SSR + hydration + DOM assertions, plus a bundle-leak guard that fails CI if any client asset references `AsyncLocalStorage`
 
 ```sh
 cd examples/react/basic
