@@ -149,7 +149,7 @@ The patterns that already are full navigations:
 - Email verification link clicks
 - Sign-out forms
 
-If you trigger a `redirectWith*` from a client-side `<Link>` click or a `useMutation` without an explicit page navigation on success, the destination loader runs before the browser commits the flash cookie, and the toast doesn't fire until refresh. **For client-side actions, fire your toast UI directly in the mutation's `onSuccess` callback** — the cookie-bridge isn't the right tool for that case.
+If you trigger a `redirectWith*` from a client-side `<Link>` click or a `useMutation` callback, the destination loader runs before the browser commits the flash cookie, and the toast doesn't fire until refresh. **For client-side actions, fire your toast UI directly in the mutation's `onSuccess`** — `toast.success('Saved')` straight to sonner, no cookie involved. The cookie bridge exists for full-navigation flows; if your trigger is already in client land, you don't need it.
 
 ```html
 <!-- ✅ Form submission — full navigation, cookie commits, toast fires -->
@@ -159,21 +159,19 @@ If you trigger a `redirectWith*` from a client-side `<Link>` click or a `useMuta
 ```
 
 ```ts
-// ✅ Mutation that does an explicit full nav on success
+// ✅ Client mutation — fire your toast UI directly, no cookie bridge
 const mutation = useMutation({
   mutationFn: () => loginFn({ data }),
-  onSuccess: () => {
-    window.location.href = '/dashboard'  // or router.navigate({ to, reloadDocument: true })
-  },
+  onSuccess: () => toast.success('Welcome back!'),
 })
 ```
 
 ```tsx
-// ❌ Client-side <Link> through a redirect-throwing loader — race; toast won't show until refresh
+// ❌ <Link> through a redirect-throwing loader — race; toast won't show until refresh
 <Link to="/trigger">Go</Link>
 ```
 
-The example app's index page is a form submission to demonstrate this exactly.
+The example app's index page is a form submission to demonstrate the cookie-bridge path exactly.
 
 ## API reference
 
