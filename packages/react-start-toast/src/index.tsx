@@ -1,12 +1,8 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import type { FlashToast } from 'start-toast-core'
+import type { FlashToast } from './types'
 
-export type {
-  FlashToast,
-  FlashToastInput,
-  FlashToastType,
-} from 'start-toast-core'
+export type { FlashToast, FlashToastInput, FlashToastType } from './types'
 
 const DEDUPE_STORAGE_KEY = 'react-start-toast:fired'
 

@@ -9,17 +9,9 @@ import {
   sealToast,
   unsealToast,
 } from 'start-toast-core'
-import type {
-  FlashToast,
-  FlashToastInput,
-  FlashToastType,
-} from 'start-toast-core'
+import type { FlashToast, FlashToastInput, FlashToastType } from './types'
 
-export type {
-  FlashToast,
-  FlashToastInput,
-  FlashToastType,
-} from 'start-toast-core'
+export type { FlashToast, FlashToastInput, FlashToastType } from './types'
 
 /** Per-app config for the flash cookie. Override defaults via `setFlashCookieOptions`. */
 export interface FlashCookieOptions {
