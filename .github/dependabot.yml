@@ -10,6 +10,14 @@ updates:
           - minor
           - patch
     open-pull-requests-limit: 5
+    # TanStack Router/Start are pinned via pnpm.overrides because of version
+    # skew across the @tanstack/start-* packages. Dependabot bumping these
+    # individually breaks the example app's typecheck (see KNOWN_ISSUES.md).
+    # Upgrade them together, by hand, when the ecosystem catches up.
+    ignore:
+      - dependency-name: "@tanstack/react-router"
+      - dependency-name: "@tanstack/react-start"
+      - dependency-name: "@tanstack/start-*"
 
   - package-ecosystem: github-actions
     directory: /
