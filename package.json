@@ -20,7 +20,7 @@
     "lint": "nx run-many --target=test:eslint --exclude=examples/**",
     "lint:fix": "nx run-many --targets=lint:fix --exclude=examples/**",
     "test": "pnpm run test:ci",
-    "test:ci": "nx run-many --targets=test:eslint,test:lib,test:types,build",
+    "test:ci": "nx run-many --targets=test:eslint,test:lib,test:types,build,test:publint",
     "test:eslint": "nx run-many --target=test:eslint --exclude=examples/**",
     "test:lib": "nx run-many --targets=test:lib --exclude=examples/**",
     "test:types": "nx run-many --targets=test:types --exclude=examples/**",

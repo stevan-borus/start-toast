@@ -44,6 +44,11 @@
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"],
       "outputs": ["{projectRoot}/build", "{projectRoot}/dist"]
+    },
+    "test:publint": {
+      "cache": true,
+      "dependsOn": ["build"],
+      "inputs": ["production", "^production"]
     }
   }
 }
