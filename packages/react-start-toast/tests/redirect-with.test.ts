@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { unsealToast } from '@tanstack/start-toast-core'
+import { unsealToast } from 'start-toast-core'
 import {
   setCookieMock,
   redirectMock,

@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import type { FlashToast } from '@tanstack/react-start-toast'
+import type { FlashToast } from 'react-start-toast'
 import { consumeFlashToast } from './flash-toast-bridge.server'
 
 /**

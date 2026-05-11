@@ -1,7 +1,8 @@
 {
-  "name": "@tanstack/start-toast-core",
-  "version": "0.0.1",
-  "description": "Framework-agnostic primitives for server-set flash toasts. The shared core that powers @tanstack/react-start-toast (and future Solid/Vue adapters).",
+  "name": "start-toast-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Framework-agnostic primitives for server-set flash toasts. Bundled into react-start-toast and any future framework adapters; not published independently.",
   "author": "Stevan Borus",
   "license": "MIT",
   "repository": {

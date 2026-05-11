@@ -12,7 +12,7 @@
 
 The repo workaround pins coherent 1.167.x versions of all three internals via `pnpm.overrides` in the root `package.json`. This keeps `pnpm dev` working in this workspace.
 
-**Consumers of the published `@tanstack/react-start-toast` are NOT affected** — the lib's `dist/` doesn't reach into the broken modules; it imports the public TSS surface (`@tanstack/react-start`, `@tanstack/react-router`, `@tanstack/react-start/server`). If the consumer's own TSS dev server boots cleanly (or they're on a coherent version pair), the lib works. The Playwright e2e suite in this example app is verified to pass against:
+**Consumers of the published `react-start-toast` are NOT affected** — the lib's `dist/` doesn't reach into the broken modules; it imports the public TSS surface (`@tanstack/react-start`, `@tanstack/react-router`, `@tanstack/react-start/server`). If the consumer's own TSS dev server boots cleanly (or they're on a coherent version pair), the lib works. The Playwright e2e suite in this example app is verified to pass against:
 
 - `react-start@1.167.40` + `plugin-core@1.167.34` (the workspace pins, used during local development)
 - `react-start@1.167.65` + `plugin-core@1.169.20` (latest at time of writing) — production build only; dev mode broken by the upstream skew above
@@ -25,7 +25,7 @@ The lib's runtime works against any TSS version where the consumer's own app boo
 
 ```sh
 # In a fresh consumer app:
-pnpm add @tanstack/react-start-toast
+pnpm add react-start-toast
 pnpm add @tanstack/react-start@<target-version>
 # Wire up per the lib README, then exercise a flow that goes through redirectWithSuccess.
 ```

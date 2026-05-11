@@ -1,4 +1,4 @@
-# `@tanstack/react-start-toast` — basic example
+# `react-start-toast` — basic example
 
 Minimal TanStack Start app demonstrating the lib end-to-end:
 

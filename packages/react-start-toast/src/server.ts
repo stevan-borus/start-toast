@@ -8,18 +8,18 @@ import {
   normalizeFlashInput,
   sealToast,
   unsealToast,
-} from '@tanstack/start-toast-core'
+} from 'start-toast-core'
 import type {
   FlashToast,
   FlashToastInput,
   FlashToastType,
-} from '@tanstack/start-toast-core'
+} from 'start-toast-core'
 
 export type {
   FlashToast,
   FlashToastInput,
   FlashToastType,
-} from '@tanstack/start-toast-core'
+} from 'start-toast-core'
 
 /** Per-app config for the flash cookie. Override defaults via `setFlashCookieOptions`. */
 export interface FlashCookieOptions {
@@ -102,14 +102,14 @@ function resolveSecret(): string {
 
   if (!resolved || resolved === PLACEHOLDER_SECRET) {
     throw new Error(
-      `[@tanstack/react-start-toast] No flash-cookie secret resolved. ` +
+      `[react-start-toast] No flash-cookie secret resolved. ` +
         `Set ${ENV_VAR} in your server environment, or call ` +
         `setFlashCookieOptions({ secret }) before any flash-toast call.`,
     )
   }
   if (resolved.length < 32) {
     throw new Error(
-      `[@tanstack/react-start-toast] Flash-cookie secret must be at least 32 characters.`,
+      `[react-start-toast] Flash-cookie secret must be at least 32 characters.`,
     )
   }
   return resolved

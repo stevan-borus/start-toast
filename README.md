@@ -1,10 +1,10 @@
 # start-toast
 
-> Server-set toast notifications for [TanStack Start](https://tanstack.com/start). A 1:1 adaptation of [`remix-toast`](https://github.com/code-forge-io/remix-toast) for TanStack Start's server-fn / cookie-bridge model.
+> Server-set toast notifications for [TanStack Start](https://tanstack.com/start). A 1:1 adaptation of [`remix-toast`](https://github.com/code-forge-io/remix-toast) for TanStack Start's server-fn / cookie-bridge model. Published on npm as **[`react-start-toast`](https://www.npmjs.com/package/react-start-toast)**.
 
 If you've used `remix-toast`, you already know the API — `setFlashToast`, `redirectWithSuccess`, `consumeFlashToast`, etc. — they work the same way. This lib closes the equivalent gap for TanStack Start.
 
-> **Status:** pre-release. APIs may change before `0.1.0`. Not yet on npm — install via `git+https` or as a workspace package.
+> Community library by [@stevan-borus](https://github.com/stevan-borus). Built for TanStack Start; not maintained by the TanStack team. Expect breaking changes on `0.x` minor bumps until `1.0.0`.
 
 ## Features
 
@@ -17,7 +17,7 @@ If you've used `remix-toast`, you already know the API — `setFlashToast`, `red
 ## Install
 
 ```sh
-pnpm add @tanstack/react-start-toast
+pnpm add react-start-toast
 ```
 
 The lib peer-depends on `@tanstack/react-router`, `@tanstack/react-start`, `react`, and `react-dom`.
@@ -28,8 +28,8 @@ The lib has **two entrypoints**, by design:
 
 | Import path                            | Use from                  | Provides                                                                                                                              |
 | -------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `@tanstack/react-start-toast`          | Client-bundled files      | `FlashToastEffect`, `ToastProvider`, type re-exports                                                                                  |
-| `@tanstack/react-start-toast/server`   | Server-only files         | `setFlashToast`, `consumeFlashToast`, `setFlashCookieOptions`, `redirectWith*`, `replaceWith*`                                        |
+| `react-start-toast`          | Client-bundled files      | `FlashToastEffect`, `ToastProvider`, type re-exports                                                                                  |
+| `react-start-toast/server`   | Server-only files         | `setFlashToast`, `consumeFlashToast`, `setFlashCookieOptions`, `redirectWith*`, `replaceWith*`                                        |
 
 Why the split: the `/server` entry imports h3's `getCookie`/`setCookie` (which pull `node:async_hooks`). If the renderer and the server helpers shared one entry, any consumer who bundled the renderer for the browser would crash hydration with `AsyncLocalStorage is not a constructor`. Splitting keeps server-only code purely server-side.
 
@@ -41,7 +41,7 @@ For runtime-resolved secrets (Vault, AWS Secrets Manager, etc.), call `setFlashC
 
 ```ts
 // In e.g. src/server.ts (anywhere server-only)
-import { setFlashCookieOptions } from '@tanstack/react-start-toast/server'
+import { setFlashCookieOptions } from 'react-start-toast/server'
 
 setFlashCookieOptions({
   name: 'my-flash',
@@ -64,7 +64,7 @@ export {
   redirectWithSuccess,
   setFlashToast,
   // ...whichever helpers you actually use
-} from '@tanstack/react-start-toast/server'
+} from 'react-start-toast/server'
 ```
 
 Every server-only import in the rest of your app goes through this file at the top level — no dynamic-import ceremony needed at call sites. See [Why a `.server.ts` re-export?](#why-a-serverts-re-export) below for why this matters.
@@ -76,7 +76,7 @@ Every server-only import in the rest of your app goes through this file at the t
 ```ts
 // src/flash-toast.functions.ts
 import { createServerFn } from '@tanstack/react-start'
-import type { FlashToast } from '@tanstack/react-start-toast'
+import type { FlashToast } from 'react-start-toast'
 import { consumeFlashToast } from './flash-toast-bridge.server'
 
 export const consumeFlashToastFn = createServerFn({ method: 'POST' }).handler(
@@ -88,7 +88,7 @@ export const consumeFlashToastFn = createServerFn({ method: 'POST' }).handler(
 
 ```tsx
 import { createRootRoute, Outlet, Scripts } from '@tanstack/react-router'
-import { ToastProvider } from '@tanstack/react-start-toast'
+import { ToastProvider } from 'react-start-toast'
 import { Toaster, toast } from 'sonner'
 import { consumeFlashToastFn } from '../flash-toast.functions'
 
@@ -201,14 +201,14 @@ The example app's index page is a form submission to demonstrate the cookie-brid
 
 ## Why a `.server.ts` re-export?
 
-A direct top-level import from `@tanstack/react-start-toast/server` from a route file or root layout — e.g. `import { consumeFlashToast } from '@tanstack/react-start-toast/server'` at the top of `__root.tsx` — crashes the production build with:
+A direct top-level import from `react-start-toast/server` from a route file or root layout — e.g. `import { consumeFlashToast } from 'react-start-toast/server'` at the top of `__root.tsx` — crashes the production build with:
 
 ```
 [plugin vite:resolve] Module "node:async_hooks" has been externalized for browser compatibility,
 imported by ".../start-server-core/.../request-response.js"
 ```
 
-Reason: route files don't go through TanStack Start's server-fn handler-stripping transform, so any top-level import is just a regular module import. `@tanstack/react-start-toast/server` transitively imports h3 (`getCookie`/`setCookie`), which transitively imports `node:async_hooks`. The whole chain ends up in the client graph and Vite refuses to bundle the Node-only module.
+Reason: route files don't go through TanStack Start's server-fn handler-stripping transform, so any top-level import is just a regular module import. `react-start-toast/server` transitively imports h3 (`getCookie`/`setCookie`), which transitively imports `node:async_hooks`. The whole chain ends up in the client graph and Vite refuses to bundle the Node-only module.
 
 The same import inside a server-fn module (`*.functions.ts`) sometimes works because TSS's compile-time transform replaces the handler body with a fetch wrapper — and if the only reference to the imported binding is inside that body, the import gets tree-shaken on the client. But that's a fragile guarantee: a single component-level reference to the binding, or a different file shape, breaks it. Empirically we've seen leaks from non-route files too.
 
@@ -220,7 +220,7 @@ The example app includes a Playwright bundle-leak guard that fails CI if `AsyncL
 >
 > ```ts
 > .handler(async () => {
->   const { consumeFlashToast } = await import('@tanstack/react-start-toast/server')
+>   const { consumeFlashToast } = await import('react-start-toast/server')
 >   return consumeFlashToast()
 > })
 > ```
@@ -257,12 +257,9 @@ pnpm install
 START_TOAST_SECRET=$(openssl rand -hex 32) pnpm dev
 ```
 
-## Packages
+## Package
 
-| Package                       | Description                                                                |
-| ----------------------------- | -------------------------------------------------------------------------- |
-| `@tanstack/start-toast-core`  | Framework-agnostic primitives. Used transitively, rarely imported directly. |
-| `@tanstack/react-start-toast` | React + TanStack Start adapter. **The package most consumers want.**       |
+Published as a single package on npm: **`react-start-toast`**. The repo also contains a `start-toast-core` workspace-internal package — the framework-agnostic primitives (schema, seal/unseal, ID gen) — but it is bundled into the React adapter at build time and is not published independently. Future framework adapters (Solid, etc.) would do the same: depend on `start-toast-core` via the workspace, bundle it into their own tarball.
 
 ## Get involved
 
