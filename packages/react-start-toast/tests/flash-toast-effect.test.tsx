@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render } from '@testing-library/react'
-import type { FlashToast } from '@tanstack/start-toast-core'
+import type { FlashToast } from 'start-toast-core'
 import { FlashToastEffect } from '../src/index.js'
 
 beforeEach(() => {

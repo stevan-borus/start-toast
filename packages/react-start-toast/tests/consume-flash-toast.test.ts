@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { sealToast, type FlashToast } from '@tanstack/start-toast-core'
+import { sealToast, type FlashToast } from 'start-toast-core'
 import {
   cookieStore,
   setCookieMock,

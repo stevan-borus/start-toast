@@ -61,7 +61,7 @@ test.describe('client bundle leak guard', () => {
       leaks,
       `Found server-only tokens in client bundle. The .server.ts ` +
         `re-export boundary failed somewhere — check that every import of ` +
-        `@tanstack/react-start-toast/server goes through a .server.ts ` +
+        `react-start-toast/server goes through a .server.ts ` +
         `file. Leaks: ${JSON.stringify(leaks, null, 2)}`,
     ).toEqual([])
   })

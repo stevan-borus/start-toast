@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import type { FlashToast } from '@tanstack/start-toast-core'
+import type { FlashToast } from 'start-toast-core'
 
 export type {
   FlashToast,
   FlashToastInput,
   FlashToastType,
-} from '@tanstack/start-toast-core'
+} from 'start-toast-core'
 
-const DEDUPE_STORAGE_KEY = '@tanstack/react-start-toast:fired'
+const DEDUPE_STORAGE_KEY = 'react-start-toast:fired'
 
 interface FlashToastEffectProps {
   /** The toast surfaced by your root loader, or `null` when none is staged. */

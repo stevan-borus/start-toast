@@ -128,8 +128,8 @@ Both achieve the same end. Both require users to wrap server-only logic in their
 
 As of 2026-05-07 (slice 3 merge):
 
-- `@tanstack/start-toast-core` — schema, types, `sealToast`/`unsealToast`, `normalizeFlashInput`, `makeFlashToastId` (15 vitest)
-- `@tanstack/react-start-toast`:
+- `start-toast-core` — schema, types, `sealToast`/`unsealToast`, `normalizeFlashInput`, `makeFlashToastId` (15 vitest)
+- `react-start-toast`:
   - `setFlashCookieOptions` (config setter)
   - `setFlashToast`, `consumeFlashToast`, `consumeFlashToastFn`
   - 5× `redirectWith*` family
@@ -137,7 +137,7 @@ As of 2026-05-07 (slice 3 merge):
   - `<FlashToastEffect />` renderer (the TSS-native addition formerly called `<ToastBridgeRenderer>` in this doc)
   - 18 vitest covering every helper
 
-That's **15 of the 17 target exports** (5 redirect + 5 replace + 3 primitives + 1 config + 1 server fn). The remaining 2 (the schema `flashToastSchema` is exported from core, accessible via `@tanstack/start-toast-core`; `FlashToast`/`FlashToastInput`/`FlashToastType` types re-export from the React adapter) plus the renderer.
+That's **15 of the 17 target exports** (5 redirect + 5 replace + 3 primitives + 1 config + 1 server fn). The remaining 2 (the schema `flashToastSchema` is exported from core, accessible via `start-toast-core`; `FlashToast`/`FlashToastInput`/`FlashToastType` types re-export from the React adapter) plus the renderer.
 
 Missing from the target:
 

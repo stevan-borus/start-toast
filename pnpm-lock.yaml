@@ -64,18 +64,18 @@ importers:
       '@tanstack/react-start':
         specifier: 1.167.40
         version: 1.167.40(crossws@0.4.5(srvx@0.11.15))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vite@8.0.11(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.8.0))
-      '@tanstack/react-start-toast':
-        specifier: workspace:*
-        version: link:../../../packages/react-start-toast
-      '@tanstack/start-toast-core':
-        specifier: workspace:*
-        version: link:../../../packages/start-toast-core
       react:
         specifier: ^19.2.5
         version: 19.2.6
       react-dom:
         specifier: ^19.2.5
         version: 19.2.6(react@19.2.6)
+      react-start-toast:
+        specifier: workspace:*
+        version: link:../../../packages/react-start-toast
+      start-toast-core:
+        specifier: workspace:*
+        version: link:../../../packages/start-toast-core
     devDependencies:
       '@playwright/test':
         specifier: ^1.50.0
@@ -104,9 +104,12 @@ importers:
 
   packages/react-start-toast:
     dependencies:
-      '@tanstack/start-toast-core':
-        specifier: workspace:*
-        version: link:../start-toast-core
+      iron-webcrypto:
+        specifier: ^2.0.0
+        version: 2.0.0
+      zod:
+        specifier: ^4.0.0
+        version: 4.4.3
     devDependencies:
       '@tanstack/react-router':
         specifier: ^1.169.2
@@ -132,6 +135,9 @@ importers:
       react-dom:
         specifier: ^19.2.5
         version: 19.2.6(react@19.2.6)
+      start-toast-core:
+        specifier: workspace:*
+        version: link:../start-toast-core
 
   packages/start-toast-core:
     dependencies:

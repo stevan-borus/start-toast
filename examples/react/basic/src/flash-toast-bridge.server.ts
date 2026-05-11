@@ -29,4 +29,4 @@ export {
   replaceWithToast,
   replaceWithWarning,
   setFlashToast,
-} from '@tanstack/react-start-toast/server'
+} from 'react-start-toast/server'
