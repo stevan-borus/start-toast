@@ -1,6 +1,6 @@
 {
   "name": "react-start-toast",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Server-set toast notifications for TanStack Start. A 1:1 adaptation of remix-toast for TSS server fns and h3 cookies.",
   "author": "Stevan Borus",
   "license": "MIT",
