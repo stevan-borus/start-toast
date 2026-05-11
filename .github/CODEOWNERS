@@ -1,0 +1,4 @@
+# Every change to this repo defaults to needing @stevan-borus as a reviewer.
+# Branch protection on `main` requires Code Owner review, so without this file
+# that rule is dormant — this turns it on.
+* @stevan-borus
