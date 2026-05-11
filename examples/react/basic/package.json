@@ -3,6 +3,13 @@
   "private": true,
   "version": "0.0.2",
   "type": "module",
+  "nx": {
+    "targets": {
+      "test:types": {
+        "dependsOn": ["build"]
+      }
+    }
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
