@@ -13,7 +13,7 @@
 ## API surface
 
 - `react-start-toast` (client): `ToastProvider`, `FlashToastEffect`, types
-- `react-start-toast/server` (server-only): `setFlashToast`, `consumeFlashToast`, `setFlashCookieOptions`, `redirectWithSuccess`, `redirectWithError`, `redirectWithInfo`, `redirectWithWarning`, `replaceWithSuccess`, `replaceWithError`, `replaceWithInfo`, `replaceWithWarning`
+- `react-start-toast/server` (server-only): `setFlashToast`, `consumeFlashToast`, `setFlashCookieOptions`, `redirectWithToast`, `redirectWithSuccess`, `redirectWithError`, `redirectWithInfo`, `redirectWithWarning`, `replaceWithToast`, `replaceWithSuccess`, `replaceWithError`, `replaceWithInfo`, `replaceWithWarning`
 
 ## Optional
 
