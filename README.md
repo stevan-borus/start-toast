@@ -1,5 +1,14 @@
 # start-toast
 
+**Use this if:** you're building with **TanStack Start (TSS)** and need
+**server-set flash toasts** — staging a toast from a server function and
+having it surface after redirect. Equivalent to `remix-toast` for the
+TSS server-fn / h3-cookie model. Headless: bring your own toast UI.
+
+**Keywords:** TanStack Start, TSS, toast, flash message, notification,
+server function, cookie flash, redirect-with-success, headless toast,
+remix-toast-equivalent.
+
 > Server-set toast notifications for [TanStack Start](https://tanstack.com/start). A 1:1 adaptation of [`remix-toast`](https://github.com/code-forge-io/remix-toast) for TanStack Start's server-fn / cookie-bridge model. Published on npm as **[`react-start-toast`](https://www.npmjs.com/package/react-start-toast)**.
 
 If you've used `remix-toast`, you already know the API — `setFlashToast`, `redirectWithSuccess`, `consumeFlashToast`, etc. — they work the same way. This lib closes the equivalent gap for TanStack Start.
@@ -26,10 +35,10 @@ The lib peer-depends on `@tanstack/react-router`, `@tanstack/react-start`, `reac
 
 The lib has **two entrypoints**, by design:
 
-| Import path                            | Use from                  | Provides                                                                                                                              |
-| -------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `react-start-toast`          | Client-bundled files      | `FlashToastEffect`, `ToastProvider`, type re-exports                                                                                  |
-| `react-start-toast/server`   | Server-only files         | `setFlashToast`, `consumeFlashToast`, `setFlashCookieOptions`, `redirectWith*`, `replaceWith*`                                        |
+| Import path                | Use from             | Provides                                                                                       |
+| -------------------------- | -------------------- | ---------------------------------------------------------------------------------------------- |
+| `react-start-toast`        | Client-bundled files | `FlashToastEffect`, `ToastProvider`, type re-exports                                           |
+| `react-start-toast/server` | Server-only files    | `setFlashToast`, `consumeFlashToast`, `setFlashCookieOptions`, `redirectWith*`, `replaceWith*` |
 
 Why the split: the `/server` entry imports h3's `getCookie`/`setCookie` (which pull `node:async_hooks`). If the renderer and the server helpers shared one entry, any consumer who bundled the renderer for the browser would crash hydration with `AsyncLocalStorage is not a constructor`. Splitting keeps server-only code purely server-side.
 
@@ -153,9 +162,7 @@ If you trigger a `redirectWith*` from a client-side `<Link>` click or a `useMuta
 
 ```html
 <!-- ✅ Form submission — full navigation, cookie commits, toast fires -->
-<form method="POST" action="/login">
-  ...
-</form>
+<form method="POST" action="/login">...</form>
 ```
 
 ```ts
@@ -177,27 +184,27 @@ The example app's index page is a form submission to demonstrate the cookie-brid
 
 ### `/server` (server-only)
 
-| Export                    | Signature                                                                                  | Notes                                                                                |
-| ------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| `setFlashToast`           | `(input: FlashToastInput, defaultType?: FlashToastType) => Promise<void>`                  | Stage a toast on the response cookie. Last write wins.                               |
-| `consumeFlashToast`       | `() => Promise<FlashToast \| null>`                                                        | Read + clear the staged toast. Returns `null` if none.                               |
-| `setFlashCookieOptions`   | `(opts: FlashCookieOptions) => void`                                                       | Override defaults: `name`, `maxAge`, `secret`, `path`, `sameSite`, `secure`, `httpOnly`. |
-| `redirectWithToast`       | `(href: string, input: FlashToastInput) => Promise<never>`                                 | Stage + `throw redirect(href)`. Defaults `type: 'info'`.                             |
-| `redirectWithSuccess`     | same                                                                                       | Defaults `type: 'success'`.                                                          |
-| `redirectWithError`       | same                                                                                       | Defaults `type: 'error'`.                                                            |
-| `redirectWithInfo`        | same                                                                                       | Defaults `type: 'info'`.                                                             |
-| `redirectWithWarning`     | same                                                                                       | Defaults `type: 'warning'`.                                                          |
-| `replaceWith*` (5 of)     | `(href, input) => Promise<never>`                                                          | Same as `redirectWith*` but `replace: true` — back button skips the trigger page.    |
+| Export                  | Signature                                                                 | Notes                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `setFlashToast`         | `(input: FlashToastInput, defaultType?: FlashToastType) => Promise<void>` | Stage a toast on the response cookie. Last write wins.                                   |
+| `consumeFlashToast`     | `() => Promise<FlashToast \| null>`                                       | Read + clear the staged toast. Returns `null` if none.                                   |
+| `setFlashCookieOptions` | `(opts: FlashCookieOptions) => void`                                      | Override defaults: `name`, `maxAge`, `secret`, `path`, `sameSite`, `secure`, `httpOnly`. |
+| `redirectWithToast`     | `(href: string, input: FlashToastInput) => Promise<never>`                | Stage + `throw redirect(href)`. Defaults `type: 'info'`.                                 |
+| `redirectWithSuccess`   | same                                                                      | Defaults `type: 'success'`.                                                              |
+| `redirectWithError`     | same                                                                      | Defaults `type: 'error'`.                                                                |
+| `redirectWithInfo`      | same                                                                      | Defaults `type: 'info'`.                                                                 |
+| `redirectWithWarning`   | same                                                                      | Defaults `type: 'warning'`.                                                              |
+| `replaceWith*` (5 of)   | `(href, input) => Promise<never>`                                         | Same as `redirectWith*` but `replace: true` — back button skips the trigger page.        |
 
 ### Root entry (client-safe)
 
-| Export                | Signature                                                              | Notes                                                                                  |
-| --------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `<FlashToastEffect>`  | `{ toast: FlashToast \| null, notify: (t: FlashToast) => void }`       | Effect-only renderer. Dedupes by `_id` in `sessionStorage`.                            |
-| `<ToastProvider>`     | `{ toaster, toast, notify, children }`                                 | Composes `<Toaster>` + `<FlashToastEffect>` in safe source order.                      |
-| `FlashToast` (type)   | `{ message, type, _id, description?, duration? }`                      | The wire format.                                                                       |
-| `FlashToastInput`     | `string \| { message, type?, description?, duration? }`                | What `setFlashToast` and `redirectWith*` accept.                                       |
-| `FlashToastType`      | `'info' \| 'success' \| 'error' \| 'warning'`                          |                                                                                        |
+| Export               | Signature                                                        | Notes                                                             |
+| -------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `<FlashToastEffect>` | `{ toast: FlashToast \| null, notify: (t: FlashToast) => void }` | Effect-only renderer. Dedupes by `_id` in `sessionStorage`.       |
+| `<ToastProvider>`    | `{ toaster, toast, notify, children }`                           | Composes `<Toaster>` + `<FlashToastEffect>` in safe source order. |
+| `FlashToast` (type)  | `{ message, type, _id, description?, duration? }`                | The wire format.                                                  |
+| `FlashToastInput`    | `string \| { message, type?, description?, duration? }`          | What `setFlashToast` and `redirectWith*` accept.                  |
+| `FlashToastType`     | `'info' \| 'success' \| 'error' \| 'warning'`                    |                                                                   |
 
 ## Why a `.server.ts` re-export?
 
