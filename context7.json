@@ -1,0 +1,14 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "react-start-toast",
+  "description": "Server-set toast notifications for TanStack Start. Headless flash toasts via server fns and h3 cookies.",
+  "folders": ["packages/react-start-toast/src", "docs/adr"],
+  "excludeFolders": [
+    "node_modules",
+    "dist",
+    ".nx",
+    "examples/react/basic/.output"
+  ],
+  "excludeFiles": ["pnpm-lock.yaml"],
+  "previousVersions": []
+}
