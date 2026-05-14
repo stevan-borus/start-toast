@@ -14,9 +14,22 @@
   "keywords": [
     "tanstack",
     "tanstack-start",
+    "tss",
+    "tss-toast",
+    "tanstack-start-toast",
+    "start-toast",
     "toast",
+    "toaster",
     "flash",
+    "flash-message",
+    "flash-toast",
+    "notification",
+    "notifications",
     "cookie",
+    "cookie-flash",
+    "server-toast",
+    "headless",
+    "headless-toast",
     "remix-toast"
   ],
   "scripts": {

@@ -1,0 +1,21 @@
+# react-start-toast
+
+> Server-set toast notifications for TanStack Start (TSS). Headless,
+> typed, cookie-flash based. 1:1 adaptation of remix-toast for the
+> TSS server-fn / h3-cookie model. npm: react-start-toast.
+
+## Docs
+
+- [README](https://github.com/stevan-borus/start-toast/blob/main/README.md): Full setup, API, and rationale
+- [llms-full.txt](https://github.com/stevan-borus/start-toast/blob/main/llms-full.txt): Full docs inlined for LLM ingestion
+- [Example app](https://github.com/stevan-borus/start-toast/tree/main/examples/react/basic): Runnable TSS + sonner example
+
+## API surface
+
+- `react-start-toast` (client): `ToastProvider`, `FlashToastEffect`, types
+- `react-start-toast/server` (server-only): `setFlashToast`, `consumeFlashToast`, `setFlashCookieOptions`, `redirectWithToast`, `redirectWithSuccess`, `redirectWithError`, `redirectWithInfo`, `redirectWithWarning`, `replaceWithToast`, `replaceWithSuccess`, `replaceWithError`, `replaceWithInfo`, `replaceWithWarning`
+
+## Optional
+
+- [ADRs](https://github.com/stevan-borus/start-toast/tree/main/docs/adr): architecture decisions and rationale
+- [CONTRIBUTING](https://github.com/stevan-borus/start-toast/blob/main/CONTRIBUTING.md): contribution guide

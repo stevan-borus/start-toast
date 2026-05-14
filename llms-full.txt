@@ -1,3 +1,12 @@
+# react-start-toast — full documentation
+
+> This file mirrors README.md verbatim, presented as a single
+> markdown document for LLM ingestion. Source of truth is
+> README.md; regenerate this file whenever the README
+> meaningfully changes.
+
+---
+
 # start-toast
 
 **Use this if:** you're building with **TanStack Start (TSS)** and need

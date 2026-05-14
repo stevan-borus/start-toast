@@ -1,7 +1,7 @@
 {
   "name": "react-start-toast",
   "version": "0.1.0",
-  "description": "Server-set toast notifications for TanStack Start. A 1:1 adaptation of remix-toast for TSS server fns and h3 cookies.",
+  "description": "Headless server-set toast notifications for TanStack Start (TSS). Flash toasts via h3 cookies and server fns — a 1:1 adaptation of remix-toast. Bring your own UI (sonner, react-toastify, etc.).",
   "author": "Stevan Borus",
   "license": "MIT",
   "repository": {
@@ -13,10 +13,26 @@
   "keywords": [
     "tanstack",
     "tanstack-start",
+    "tss",
+    "tss-toast",
+    "tanstack-start-toast",
+    "start-toast",
     "react",
     "toast",
+    "toaster",
     "flash",
+    "flash-message",
+    "flash-toast",
+    "notification",
+    "notifications",
     "cookie",
+    "cookie-flash",
+    "server-toast",
+    "redirect-with-toast",
+    "sonner",
+    "react-toastify",
+    "headless",
+    "headless-toast",
     "remix-toast"
   ],
   "scripts": {
