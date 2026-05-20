@@ -1,11 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { unsealToast } from 'start-toast-core'
-import {
-  setCookieMock,
-  redirectMock,
-  resetMocks,
-  TEST_PASSWORD,
-} from './setup'
+import { setCookieMock, redirectMock, resetMocks, TEST_PASSWORD } from './setup'
 import {
   replaceWithToast,
   replaceWithSuccess,

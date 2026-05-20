@@ -1,15 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { sealToast, type FlashToast } from 'start-toast-core'
-import {
-  cookieStore,
-  setCookieMock,
-  resetMocks,
-  TEST_PASSWORD,
-} from './setup'
-import {
-  consumeFlashToast,
-  setFlashCookieOptions,
-} from '../src/server.js'
+import { cookieStore, setCookieMock, resetMocks, TEST_PASSWORD } from './setup'
+import { consumeFlashToast, setFlashCookieOptions } from '../src/server.js'
 
 beforeEach(() => {
   resetMocks()
