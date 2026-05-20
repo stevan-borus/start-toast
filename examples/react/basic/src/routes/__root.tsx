@@ -74,7 +74,9 @@ function RootDocument({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body style={{ fontFamily: 'system-ui, sans-serif', margin: 0, padding: 24 }}>
+      <body
+        style={{ fontFamily: 'system-ui, sans-serif', margin: 0, padding: 24 }}
+      >
         {children}
         <Scripts />
       </body>

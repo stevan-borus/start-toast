@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import {
-  setCookieMock,
-  resetMocks,
-  TEST_PASSWORD,
-} from './setup'
+import { setCookieMock, resetMocks, TEST_PASSWORD } from './setup'
 import { setFlashCookieOptions, setFlashToast } from '../src/server.js'
 
 beforeEach(() => {
@@ -45,4 +41,3 @@ describe('setFlashToast', () => {
     expect(setCookieMock.mock.calls[0]![1]).toMatch(/^Fe26\.2\*/)
   })
 })
-

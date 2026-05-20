@@ -15,13 +15,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 // playwright.config.ts runs `pnpm build` in webServer.command before tests
 // fire, so .output/public/assets is fresh when this runs.
 
-const CLIENT_BUNDLE_DIR = join(
-  __dirname,
-  '..',
-  '.output',
-  'public',
-  'assets',
-)
+const CLIENT_BUNDLE_DIR = join(__dirname, '..', '.output', 'public', 'assets')
 
 const FORBIDDEN_TOKENS = [
   // h3's AsyncLocalStorage init — the actual crash signal.
@@ -45,7 +39,10 @@ test.describe('client bundle leak guard', () => {
     const jsFiles = readdirSync(CLIENT_BUNDLE_DIR).filter((f) =>
       f.endsWith('.js'),
     )
-    expect(jsFiles.length, 'expected at least one .js file in the client bundle').toBeGreaterThan(0)
+    expect(
+      jsFiles.length,
+      'expected at least one .js file in the client bundle',
+    ).toBeGreaterThan(0)
 
     const leaks: Array<{ file: string; token: string }> = []
     for (const file of jsFiles) {

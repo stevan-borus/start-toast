@@ -7,8 +7,8 @@
 ## Goal
 
 Make `react-start-toast` easy for AI coding agents to find when a user asks
-something like *"is there a toast lib for TanStack Start?"* or *"flash
-messages in TSS"*. Today the lib is on npm and GitHub but the metadata is
+something like _"is there a toast lib for TanStack Start?"_ or _"flash
+messages in TSS"_. Today the lib is on npm and GitHub but the metadata is
 sparse, there is no AI-readable index file, and Context7 doesn't know about
 the repo, so agents that consult Context7 first will silently miss it.
 
@@ -76,7 +76,7 @@ performs it via the GitHub web UI.
 
 ### B. README "When to use this" lead block
 
-Insert immediately under the `# start-toast` heading, *before* the existing
+Insert immediately under the `# start-toast` heading, _before_ the existing
 blockquote. Content:
 
 ```md
@@ -107,15 +107,18 @@ search-bait for agents grepping for partial matches (`TSS`, `flash`,
 > TSS server-fn / h3-cookie model. npm: react-start-toast.
 
 ## Docs
+
 - [README](https://github.com/stevan-borus/start-toast/blob/main/README.md): Full setup, API, and rationale
 - [llms-full.txt](https://github.com/stevan-borus/start-toast/blob/main/llms-full.txt): Full docs inlined for LLM ingestion
 - [Example app](https://github.com/stevan-borus/start-toast/tree/main/examples/react/basic): Runnable TSS + sonner example
 
 ## API surface
+
 - `react-start-toast` (client): `ToastProvider`, `FlashToastEffect`, types
 - `react-start-toast/server` (server-only): `setFlashToast`, `consumeFlashToast`, `setFlashCookieOptions`, `redirectWith{Success,Error,Info,Warning}`, `replaceWith{Success,Error,Info,Warning}`
 
 ## Optional
+
 - [ADRs](https://github.com/stevan-borus/start-toast/tree/main/docs/adr)
 - [CONTRIBUTING](https://github.com/stevan-borus/start-toast/blob/main/CONTRIBUTING.md)
 ```
@@ -144,7 +147,12 @@ the chunker at the right files.
   "projectTitle": "react-start-toast",
   "description": "Server-set toast notifications for TanStack Start. Headless flash toasts via server fns and h3 cookies.",
   "folders": ["packages/react-start-toast/src", "docs/adr"],
-  "excludeFolders": ["node_modules", "dist", ".nx", "examples/react/basic/.output"],
+  "excludeFolders": [
+    "node_modules",
+    "dist",
+    ".nx",
+    "examples/react/basic/.output"
+  ],
   "excludeFiles": ["pnpm-lock.yaml"],
   "previousVersions": []
 }
@@ -164,15 +172,15 @@ PR on their public registry repo with the same `context7.json` payload.
 
 ## Files touched
 
-| File | Change |
-|------|--------|
-| `packages/react-start-toast/package.json` | Expand `keywords`, update `description` |
-| `packages/start-toast-core/package.json` | Expand `keywords` (no React-only terms) |
-| `README.md` | Insert "When to use this" lead block under title |
-| `llms.txt` (new) | Repo root, AI index per llmstxt.org spec |
-| `llms-full.txt` (new) | Repo root, README inlined for one-read ingestion |
-| `context7.json` (new) | Repo root, Context7 indexing hints |
-| `.changeset/<random>.md` (new) | Patch bump for `react-start-toast` so the new npm `description` ships on next publish |
+| File                                      | Change                                                                                |
+| ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| `packages/react-start-toast/package.json` | Expand `keywords`, update `description`                                               |
+| `packages/start-toast-core/package.json`  | Expand `keywords` (no React-only terms)                                               |
+| `README.md`                               | Insert "When to use this" lead block under title                                      |
+| `llms.txt` (new)                          | Repo root, AI index per llmstxt.org spec                                              |
+| `llms-full.txt` (new)                     | Repo root, README inlined for one-read ingestion                                      |
+| `context7.json` (new)                     | Repo root, Context7 indexing hints                                                    |
+| `.changeset/<random>.md` (new)            | Patch bump for `react-start-toast` so the new npm `description` ships on next publish |
 
 `start-toast-core` is private, so its keyword change does not need a
 changeset.

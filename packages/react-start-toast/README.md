@@ -4,9 +4,7 @@ Server-set toast notifications for [TanStack Start](https://tanstack.com/start).
 
 ```ts
 // In a server-fn handler:
-const { redirectWithSuccess } = await import(
-  'react-start-toast/server'
-)
+const { redirectWithSuccess } = await import('react-start-toast/server')
 await redirectWithSuccess('/dashboard', 'Logged in!')
 ```
 

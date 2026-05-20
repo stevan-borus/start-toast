@@ -1,5 +1,12 @@
 # react-start-toast
 
+## 0.1.1
+
+### Patch Changes
+
+- Expand npm keywords and sharpen the package description for AI-agent ([#23](https://github.com/stevan-borus/start-toast/pull/23))
+  discoverability. No runtime or API changes.
+
 ## 0.1.0
 
 ### Minor Changes

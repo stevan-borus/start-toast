@@ -14,15 +14,15 @@
 
 ## File Structure
 
-| File | Status | Responsibility |
-|------|--------|----------------|
-| `packages/react-start-toast/package.json` | Modify | Expand npm keywords + sharpen description |
-| `packages/start-toast-core/package.json` | Modify | Expand keywords (private pkg; helps in-repo search only) |
-| `README.md` | Modify | Insert "When to use this" + keyword block under the title |
-| `llms.txt` | Create | Root-level AI index per llmstxt.org spec |
-| `llms-full.txt` | Create | Root-level inlined full docs for one-read agent ingestion |
-| `context7.json` | Create | Context7 chunker hints (folders to index, folders to skip) |
-| `.changeset/ai-discoverability.md` | Create | Patch bump for `react-start-toast` so npm picks up the new description |
+| File                                      | Status | Responsibility                                                         |
+| ----------------------------------------- | ------ | ---------------------------------------------------------------------- |
+| `packages/react-start-toast/package.json` | Modify | Expand npm keywords + sharpen description                              |
+| `packages/start-toast-core/package.json`  | Modify | Expand keywords (private pkg; helps in-repo search only)               |
+| `README.md`                               | Modify | Insert "When to use this" + keyword block under the title              |
+| `llms.txt`                                | Create | Root-level AI index per llmstxt.org spec                               |
+| `llms-full.txt`                           | Create | Root-level inlined full docs for one-read agent ingestion              |
+| `context7.json`                           | Create | Context7 chunker hints (folders to index, folders to skip)             |
+| `.changeset/ai-discoverability.md`        | Create | Patch bump for `react-start-toast` so npm picks up the new description |
 
 Each file is independent; tasks below treat each as its own commit so the history reads cleanly.
 
@@ -33,6 +33,7 @@ This work has no tests in the conventional sense (it's metadata/docs), but each 
 ## Task 1: Expand `react-start-toast` package metadata
 
 **Files:**
+
 - Modify: `packages/react-start-toast/package.json` (keywords array + description string)
 
 - [ ] **Step 1: Read current state**
@@ -40,6 +41,7 @@ This work has no tests in the conventional sense (it's metadata/docs), but each 
 Run: `cat packages/react-start-toast/package.json | jq '.keywords, .description'`
 
 Expected output (current):
+
 ```
 [
   "tanstack",
@@ -127,6 +129,7 @@ EOF
 ## Task 2: Expand `start-toast-core` package metadata
 
 **Files:**
+
 - Modify: `packages/start-toast-core/package.json` (keywords array only — description is fine and the package is private)
 
 - [ ] **Step 1: Update keywords**
@@ -186,11 +189,12 @@ EOF
 ## Task 3: Add "When to use this" lead block to README
 
 **Files:**
+
 - Modify: `README.md` (insert between line 1 `# start-toast` and line 3 blockquote)
 
 - [ ] **Step 1: Insert the lead block**
 
-In `README.md`, immediately after the `# start-toast` heading (line 1), and *before* the existing `> Server-set toast notifications...` blockquote, insert:
+In `README.md`, immediately after the `# start-toast` heading (line 1), and _before_ the existing `> Server-set toast notifications...` blockquote, insert:
 
 ```markdown
 **Use this if:** you're building with **TanStack Start (TSS)** and need
@@ -201,7 +205,6 @@ TSS server-fn / h3-cookie model. Headless: bring your own toast UI.
 **Keywords:** TanStack Start, TSS, toast, flash message, notification,
 server function, cookie flash, redirect-with-success, headless toast,
 remix-toast-equivalent.
-
 ```
 
 (Note the blank line before the existing blockquote — leave one blank line of separation so markdown renders cleanly.)
@@ -240,6 +243,7 @@ EOF
 ## Task 4: Add `llms.txt` at repo root
 
 **Files:**
+
 - Create: `llms.txt`
 
 - [ ] **Step 1: Create the file with the following content**
@@ -295,6 +299,7 @@ EOF
 ## Task 5: Add `llms-full.txt` at repo root
 
 **Files:**
+
 - Create: `llms-full.txt`
 
 - [ ] **Step 1: Create the file by inlining the README with a header note**
@@ -355,6 +360,7 @@ EOF
 ## Task 6: Add `context7.json` at repo root
 
 **Files:**
+
 - Create: `context7.json`
 
 - [ ] **Step 1: Create the file**
@@ -364,19 +370,14 @@ EOF
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "react-start-toast",
   "description": "Server-set toast notifications for TanStack Start. Headless flash toasts via server fns and h3 cookies.",
-  "folders": [
-    "packages/react-start-toast/src",
-    "docs/adr"
-  ],
+  "folders": ["packages/react-start-toast/src", "docs/adr"],
   "excludeFolders": [
     "node_modules",
     "dist",
     ".nx",
     "examples/react/basic/.output"
   ],
-  "excludeFiles": [
-    "pnpm-lock.yaml"
-  ],
+  "excludeFiles": ["pnpm-lock.yaml"],
   "previousVersions": []
 }
 ```
@@ -386,6 +387,7 @@ EOF
 Run: `cat context7.json | jq '.projectTitle, (.folders | length), (.excludeFolders | length)'`
 
 Expected:
+
 ```
 "react-start-toast"
 2
@@ -414,6 +416,7 @@ EOF
 ## Task 7: Add a changeset for the npm description change
 
 **Files:**
+
 - Create: `.changeset/ai-discoverability.md`
 
 - [ ] **Step 1: Create the changeset file**
@@ -463,6 +466,7 @@ Expected: all tasks pass — `test:eslint`, `test:lib`, `test:types`, `build`, `
 - [ ] **Step 2: If anything fails, investigate before continuing**
 
 The previous tasks should not have touched any code paths that affect linting, types, builds, or publint. If something fails:
+
 - `test:eslint` failure → likely a prettier/eslint disagreement in README.md; run `pnpm format` and re-run.
 - `test:publint` failure → likely a malformed `package.json` from Task 1 or 2; re-check JSON with `jq`.
 - Anything else → stop and surface the failure rather than working around it.

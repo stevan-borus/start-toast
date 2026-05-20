@@ -24,9 +24,8 @@ describe('secret resolution', () => {
 
   it('prefers an explicit setFlashCookieOptions({ secret }) over the env var', async () => {
     process.env[ENV_VAR] = TEST_PASSWORD
-    const { setFlashCookieOptions, setFlashToast } = await import(
-      '../src/server.js'
-    )
+    const { setFlashCookieOptions, setFlashToast } =
+      await import('../src/server.js')
     setFlashCookieOptions({ secret: ANOTHER_SECRET })
     // Both are valid 32+ char strings; just assert no throw — the precedence
     // is what we're verifying, sealing succeeds either way.
@@ -34,9 +33,8 @@ describe('secret resolution', () => {
   })
 
   it('accepts a thunk for runtime-resolved secrets', async () => {
-    const { setFlashCookieOptions, setFlashToast } = await import(
-      '../src/server.js'
-    )
+    const { setFlashCookieOptions, setFlashToast } =
+      await import('../src/server.js')
     setFlashCookieOptions({ secret: () => TEST_PASSWORD })
     await expect(setFlashToast('hi')).resolves.not.toThrow()
   })
@@ -49,9 +47,8 @@ describe('secret resolution', () => {
   })
 
   it('throws when the resolved secret is shorter than 32 characters', async () => {
-    const { setFlashCookieOptions, setFlashToast } = await import(
-      '../src/server.js'
-    )
+    const { setFlashCookieOptions, setFlashToast } =
+      await import('../src/server.js')
     setFlashCookieOptions({ secret: SHORT_SECRET })
     await expect(setFlashToast('hi')).rejects.toThrow(/at least 32 characters/)
   })

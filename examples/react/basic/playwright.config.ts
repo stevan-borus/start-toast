@@ -31,7 +31,5 @@ export default defineConfig({
       PORT: String(PORT),
     },
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 })
