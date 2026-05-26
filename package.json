@@ -34,7 +34,7 @@
     "eslint": "^10.4.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "happy-dom": "^20.9.0",
-    "nx": "^22.7.2",
+    "nx": "^22.7.4",
     "premove": "^4.0.0",
     "prettier": "^3.8.3",
     "publint": "^0.3.21",
