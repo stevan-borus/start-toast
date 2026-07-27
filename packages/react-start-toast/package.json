@@ -79,9 +79,9 @@
     "@testing-library/react": "^16.0.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^6.0.2",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "@vitejs/plugin-react": "^6.0.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "peerDependencies": {
     "@tanstack/react-router": ">=1.167.0",
