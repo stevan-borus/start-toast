@@ -24,17 +24,17 @@
     "@tanstack/react-start": "1.167.40",
     "react-start-toast": "workspace:*",
     "start-toast-core": "workspace:*",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
-    "@playwright/test": "^1.61.0",
-    "@types/node": "^26.0.1",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^6.0.2",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
     "nitro": "^3.0.260311-beta",
     "typescript": "6.0.3",
-    "vite": "^8.0.16"
+    "vite": "^8.2.1"
   }
 }
