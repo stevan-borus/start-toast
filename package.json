@@ -31,16 +31,16 @@
     "@svitejs/changesets-changelog-github-compact": "^1.2.0",
     "@tanstack/eslint-config": "0.4.0",
     "@types/node": "^26.2.0",
-    "eslint": "^10.8.1",
+    "eslint": "^10.9.0",
     "eslint-plugin-unused-imports": "^4.4.1",
-    "happy-dom": "^20.11.2",
+    "happy-dom": "^20.11.6",
     "nx": "^23.1.1",
     "premove": "^4.0.0",
     "prettier": "^3.9.6",
-    "publint": "^0.3.23",
+    "publint": "^0.3.24",
     "tsdown": "^0.22.14",
     "typescript": "6.0.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "overrides": {
     "start-toast-core": "workspace:*",
