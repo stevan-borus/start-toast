@@ -70,7 +70,7 @@
   ],
   "dependencies": {
     "iron-webcrypto": "^2.0.0",
-    "zod": "^4.6.5"
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "start-toast-core": "workspace:*",

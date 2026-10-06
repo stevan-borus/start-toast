@@ -6,7 +6,7 @@ export default defineConfig({
   entry: ['./src/index.tsx', './src/server.ts'],
   format: ['esm', 'cjs'],
   unbundle: true,
-  noExternal: ['start-toast-core'],
+  deps: { alwaysBundle: ['start-toast-core'] },
   dts: true,
   sourcemap: true,
   clean: true,

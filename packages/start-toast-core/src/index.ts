@@ -15,8 +15,7 @@ export type FlashToastType = FlashToast['type']
 
 /** Public input shape — everything except `_id` (assigned at stage time). */
 export type FlashToastInput =
-  | string
-  | (Omit<FlashToast, '_id' | 'type'> & { type?: FlashToastType })
+  string | (Omit<FlashToast, '_id' | 'type'> & { type?: FlashToastType })
 
 /** Generate the dedupe-key stamped on every staged toast. */
 export function makeFlashToastId(): string {
