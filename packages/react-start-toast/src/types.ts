@@ -15,8 +15,7 @@ export interface FlashToast {
 }
 
 export type FlashToastInput =
-  | string
-  | (Omit<FlashToast, '_id' | 'type'> & { type?: FlashToastType })
+  string | (Omit<FlashToast, '_id' | 'type'> & { type?: FlashToastType })
 
 // Compile-time guard: keep these public types structurally identical to
 // core's runtime-derived types. Re-exporting from `start-toast-core` directly
